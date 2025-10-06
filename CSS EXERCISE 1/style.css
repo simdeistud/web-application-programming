@@ -29,3 +29,9 @@ article header > p:first-letter {
     margin-right: 5px;
     float: left;
 }
+
+@media (max-width: 600px) {
+    article {
+        column-count: 1;
+    }
+}
