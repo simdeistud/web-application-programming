@@ -102,10 +102,6 @@ a[href^="mailto:"]::before {
         column-count: 1;
     }
 
-    article > :not(section) {
-        
-    }
-
     article > section {
         break-before: page;
         column-count: 2;
