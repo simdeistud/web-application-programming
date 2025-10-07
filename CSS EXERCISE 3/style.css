@@ -79,8 +79,21 @@ a[href^="mailto:"]::before {
 }
 
 @media print{
-    body {
+
+    @page {
         size: A5;
         margin: 3cm;
+    }
+
+    article {
+        break-after: always;
+    }
+
+    article section {
+        break-after: always;
+    }
+
+    body > :not(article) {
+        display: none;
     }
 }
