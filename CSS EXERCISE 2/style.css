@@ -37,6 +37,15 @@ article header > p:first-letter {
     margin-right: 5px;
     line-height: 400%;
 }
-  header:has(input[type=checkbox]:checked) ~ div.article-content {
+
+header:has(input[type=checkbox]:checked) ~ div.article-content {
     display: initial;
+}
+
+header:has(input[type=checkbox]:checked) ~ footer {
+    display: initial;
+}
+
+article section h2 {
+    display: inline-block;
 }
