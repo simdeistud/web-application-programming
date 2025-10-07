@@ -32,10 +32,7 @@ article aside img{
 
 article header > p:first-letter {
     font-size: 400%;
-    border: 3px solid rgb(169, 29, 29);
-    padding: 5px;
-    margin-right: 5px;
-    line-height: 400%;
+    margin-right: 2px;
 }
 
 header:has(input[type=checkbox]:checked) ~ div.article-content {
