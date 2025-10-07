@@ -67,6 +67,7 @@ a[href^="mailto:"]::before {
         width: 21cm;
         background-image: none;
         background-color: lightgray;
+        padding: 5%
     }
 
     article {
@@ -79,6 +80,7 @@ a[href^="mailto:"]::before {
 
 @media print{
     body {
+        size: A5;
         margin: 3cm;
     }
 }
