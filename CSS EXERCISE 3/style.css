@@ -28,7 +28,6 @@ article aside img{
     max-width: 50%;
     margin: 10px;
     border: 3px solid black;
-    filter: grayscale(100%);
 }
 
 article header > p:first-letter {
@@ -76,6 +75,10 @@ a[href^="mailto:"]::before {
         box-shadow: 10px 5px 5px gray;
         border: 2px solid black;
         padding: 5%
+    }
+
+    article aside img{
+        filter: grayscale(100%);
     }
 }
 
