@@ -27,7 +27,8 @@ article aside img{
     float: right;
     max-width: 50%;
     margin: 10px;
-    border: 5px solid rgb(169, 29, 29);
+    border: 3px solid black;
+    filter: grayscale(100%);
 }
 
 article header > p:first-letter {
@@ -98,15 +99,17 @@ a[href^="mailto:"]::before {
         box-shadow: none;
         border: none;
         padding: 0;
+        column-count: 1;
     }
 
     article > :not(section) {
-        column-count: 1;
+        
     }
 
     article > section {
         break-before: page;
-        break-before: column;;
+        column-count: 2;
+        break-before: column;
     }
 
     body > :not(article) {
