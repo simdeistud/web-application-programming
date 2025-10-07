@@ -46,3 +46,15 @@ header:has(input[type=checkbox]:checked) ~ footer {
 article section h2 {
     display: inline-block;
 }
+
+@media (max-width: 600px) {
+    article {
+        column-count: 1;
+    }
+}
+
+@media print{
+    body {
+        margin: 3cm;
+    }
+}
