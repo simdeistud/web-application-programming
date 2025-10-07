@@ -46,3 +46,12 @@ header:has(input[type=checkbox]:checked) ~ footer {
 article section h2 {
     display: inline-block;
 }
+
+a[href^="http"]::after {
+    content: " ("attr(href)")";
+    font-size: 80%;
+}
+
+a[href^="mailto:"]::before {
+    content: "✉";
+}
