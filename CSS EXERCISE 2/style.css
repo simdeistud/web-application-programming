@@ -15,6 +15,14 @@ article {
     column-gap: 10%;
 }
 
+article section div.article-content {
+    display: none;
+}
+
+article section footer {
+    display: none;
+}
+
 article aside img{
     float: right;
     max-width: 50%;
@@ -27,5 +35,8 @@ article header > p:first-letter {
     border: 3px solid rgb(169, 29, 29);
     padding: 5px;
     margin-right: 5px;
-    float: left;
+    line-height: 400%;
+}
+  header:has(input[type=checkbox]:checked) ~ div.article-content {
+    display: initial;
 }
