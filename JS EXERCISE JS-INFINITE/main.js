@@ -1,7 +1,3 @@
 function infinite(x){
-    if(x === undefined){
-        return infinite;
-    } else {
-        return x;
-    }
+    return x === undefined ? infinite : x;
 }
