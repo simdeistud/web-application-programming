@@ -1,6 +1,6 @@
 function wordCounter(s=""){
-    words = s.split(" ")
-    freq = []
+    let words = s.split(" ");
+    let freq = [];
     words.forEach(element => {
         if (freq[element] === undefined) {
             freq[element] = 1;
@@ -9,7 +9,7 @@ function wordCounter(s=""){
         }
     });
     for(e in freq){
-        freq[e] = freq[e] + "/" + words.length
+        freq[e] = freq[e] + "/" + words.length;
     }
-    return freq
+    return freq;
 }
