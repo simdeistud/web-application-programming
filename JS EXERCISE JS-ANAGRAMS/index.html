@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <textarea rows="1" id="word"></textarea>
+        <button id="button">
+            Anagram!
+        </button>
+        <script>
+            let button= document.getElementById("button");
+            function anagram(event){
+                let word = document.getElementById("button").value;
+                let letters = word.split();
+                console.log(letters);
+            }
+            button.addEventListener('click', anagram, false)
+        </script>
+    </body>
+</html>
