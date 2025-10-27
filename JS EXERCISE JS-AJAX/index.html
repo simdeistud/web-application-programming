@@ -8,39 +8,37 @@
 <body>
 
     <input type="text" id="textbox">
-    <input type="button" id="button" value="get info">
     <main>
 
     </main>
 
     <script>
-        let button = document.getElementById("button");
+        let text = document.getElementById("textbox");
 
         function get_info(event) {
+            console.log("writing attempt");
             var xhr = new XMLHttpRequest();
-            let text = document.getElementById("textbox").value;
+            let animal = text.value;
 
             /* The function runs every time the user modifies
                the text. If it finds a document with the
                specified name, it puts the content inside
                the <main>, otherwise it fails silently   */
             function update_info() {
-                let obj;
                 if (xhr.readyState == 4) {
                     if (xhr.status == 200) {
-                        obj = JSON.parse(xhr.responseText);
-                        console.log("writing attempt");
                         document.querySelector("main").innerHTML = xhr.responseText;
-                        console.log(obj);
+                        console.log(xhr.responseText);
                     }
                 }
             }
 
             xhr.onreadystatechange = update_info;
-            xhr.open("GET", text + ".json", true);
+            xhr.open("GET", animal + ".json", true);
             xhr.send(null);
         }
-        button.addEventListener('click', get_info, false)
+
+        text.addEventListener('change', get_info, false);
     </script>
 </body>
 
