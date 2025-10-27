@@ -16,26 +16,7 @@
         let text = document.getElementById("textbox");
 
         function get_info(event) {
-            console.log("writing attempt");
-            var xhr = new XMLHttpRequest();
-            let animal = text.value;
-
-            /* The function runs every time the user modifies
-               the text. If it finds a document with the
-               specified name, it puts the content inside
-               the <main>, otherwise it fails silently   */
-            function update_info() {
-                if (xhr.readyState == 4) {
-                    if (xhr.status == 200) {
-                        document.querySelector("main").innerHTML = xhr.responseText;
-                        console.log(xhr.responseText);
-                    }
-                }
-            }
-
-            xhr.onreadystatechange = update_info;
-            xhr.open("GET", animal + ".json", true);
-            xhr.send(null);
+            fetch(text.value + ".json").then(response => response.text()).then(data => document.querySelector("main").innerHTML = data);
         }
 
         text.addEventListener('change', get_info, false);
