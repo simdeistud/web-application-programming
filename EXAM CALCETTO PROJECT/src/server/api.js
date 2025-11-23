@@ -10,9 +10,10 @@ router.use("/fields", fields);
 router.use("/tournaments", tournaments);
 router.use("/matches", matches);
 	
+// GET  /api/whoami  If authenticated, returns information about the current user
 router.get("/whoami", (req, res, next) => { 
     res.writeHead(401);
-    res.end("ERROR: LOGIN FIRST TO SEE YOUR INFORMATION");
+    res.end();
   });
  
 module.exports = router;
