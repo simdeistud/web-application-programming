@@ -3,10 +3,12 @@ const uri = "mongodb://localhost:27017";
 const client = new MongoClient(uri);
 
 async function connect() {
-  try {
-    await client.connect();
-  } finally {
-    await client.close();
+  if (!client.isConnected()) {
+    try {
+      await client.connect();
+    } finally {
+      client.close();
+    }
   }
 }
 connect().catch(console.log);

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-// GET  /api/fields?q=query  List of sports fields (searchable)   
+// GET  /api/fields?q=query  List of sports fields (searchable)
 router.get("", (req, res) => {});
 
 // GET  /api/fields/:id  Field details

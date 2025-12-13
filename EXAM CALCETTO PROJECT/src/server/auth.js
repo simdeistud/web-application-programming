@@ -58,8 +58,7 @@ router.post("/signup", (req, res) => {
     res.end();
     return;
   }
-  res.header(201);
-  res.json(user);
+  res.header(201).json(user);
   res.end();
 });
 
