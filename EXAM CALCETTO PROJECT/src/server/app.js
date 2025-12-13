@@ -3,6 +3,8 @@ const app = express();
 const api = require("./api.js");
 const port = 8080;
 
+app.use(express.urlencoded());
+
 app.get("/", (req, res) => {
   res.send("index.html");
 });
