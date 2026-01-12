@@ -31,7 +31,7 @@ const authenticate = (username, password) => {
 
 // POST  /api/auth/signup  Register a new user
 router.post("/signup", (req, res) => {
-  if (!req.body.password || !req.body.username || !req.body.full_name) {
+  if (!req.body.password || !req.body.username || !req.body.name || !req.body.surname) {
     res.header(400).json({ error: "Missing required field(s)" });
     res.end();
     return;
@@ -44,17 +44,20 @@ router.post("/signup", (req, res) => {
   }
   const user = {
     username: req.body.username,
-    full_name: req.body.full_name,
+    name: req.body.name,
+    surname: req.body.surname,
+    hashed_psw: null,
+    salt: null
   };
   user.hashed_psw, user.salt = hashPassword(req.body.password);
   if (!user.hashed_psw || !user.salt) {
-    res.header(500).json({ error: "Error hashing password" });
+    res.header(500).json({ error: "An error occurred while processing your credentials." });
     res.end();
     return;
   }
   db.client.db("calcetto").collection("users").insertOne(user);
   if (!db.client.db("calcetto").collection("users").findOne(user)) {
-    res.header(500).json({ error: "Error inserting new user into database" });
+    res.header(500).json({ error: "An error occurred creating your account." });
     res.end();
     return;
   }
