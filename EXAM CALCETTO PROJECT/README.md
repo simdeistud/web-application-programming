@@ -12,7 +12,8 @@ user = {
     String::username,
     String::hashed_psw,
     String::salt,
-    String::full_name
+    String::name,
+    String::surname
 }
 ```
 
@@ -31,8 +32,8 @@ field = {
     Time::opening_time,
     Time::closing_time,
     Timeslot[]::timeslot = {
-        String::starting_hour,
-        String::ending_hour,
+        Datetime::starting_hour,
+        Datetime::ending_hour,
     }
     Booking[]::booking
 }
