@@ -32,54 +32,67 @@ const authenticate = (username, password) => {
 // POST  /api/auth/signup  Register a new user
 router.post("/signup", (req, res) => {
   if (!req.body.password || !req.body.username || !req.body.name || !req.body.surname) {
-    res.header(400).json({ error: "Missing required field(s)" });
+    res.header(400).json({ error: "Missing required field(s)." });
     res.end();
     return;
   }
+
   db.connect();
+
   if (db.client.db("calcetto").collection("users").findOne({ username: req.body.username })) {
-    res.header(409).json({ error: "User already exists" });
+    res.header(409).json({ error: "User already exists." });
     res.end();
     return;
   }
+
   const user = {
     username: req.body.username,
     name: req.body.name,
     surname: req.body.surname,
-    hashed_psw: null,
-    salt: null
   };
+
   user.hashed_psw, user.salt = hashPassword(req.body.password);
   if (!user.hashed_psw || !user.salt) {
     res.header(500).json({ error: "An error occurred while processing your credentials." });
     res.end();
     return;
   }
+
   db.client.db("calcetto").collection("users").insertOne(user);
   if (!db.client.db("calcetto").collection("users").findOne(user)) {
     res.header(500).json({ error: "An error occurred creating your account." });
     res.end();
     return;
   }
+
   res.header(201).json(user);
   res.end();
 });
 
 // POST  /api/auth/signin  User login
 router.post("/signin", (req, res) => {
+  if (!req.body.password || !req.body.username) {
+    res.header(400).json({ error: "Missing login information." });
+    res.end();
+    return;
+  }
+
   const user = {
     username: req.body.username,
     password: req.body.password,
   };
-  res.header(401);
-  
-  if ("user found and password correct") {
-    const token = jwt.sign({ username: user.username }, "calcetto", {
-      expiresIn: 86400,
-    });
-    res.header(200);
-    res.cookie("token", token, { httpOnly: true });
+
+  if (!authenticate(user.username, user.password)) {
+    res.header(409).json({ error: "Invalid credentials." });
+    res.end();
+    return;
   }
+
+  const token = jwt.sign({ username: user.username }, "calcetto", {
+    expiresIn: 86400,
+  });
+  res.header(200);
+  res.cookie("token", token, { httpOnly: true });
   res.json({ username: user.username });
   res.end();
 });
