@@ -13,35 +13,37 @@ const hashPassword = (password) => {
   return { salt, hash };
 };
 
-const verifyPassword = (password, salt, storedHash) => {
+const passwordIsValid = (password, salt, storedHash) => {
   const hash = crypto
     .pbkdf2Sync(password, salt, 1000, 64, "sha512")
     .toString("hex");
   return hash === storedHash;
 };
 
-const authenticate = (username, password) => {
-  // turn this into a middleware
-  db.connect();
-  // Retrieve user from database
-  const user = null; // Retrieve from DB
-  if (!user) return false;
-  return verifyPassword(password, user.salt, user.hashed_psw);
-};
+const authenticate = (req, res, next) => {
+    const auth = req.headers.authorization;
+    if (!auth?.startsWith("Bearer ")) return res.sendStatus(401);
+    const token = auth.split(" ")[1];
+    try {
+        req.body.username = jwt.verify(token, process.env.JWT_SECRET);
+        next();
+    } catch {
+        return res.sendStatus(401);
+    }
+}
+
 
 // POST  /api/auth/signup  Register a new user
 router.post("/signup", (req, res) => {
   if (!req.body.password || !req.body.username || !req.body.name || !req.body.surname) {
-    res.header(400).json({ error: "Missing required field(s)." });
-    res.end();
+    res.status(400).json({ error: "Missing required field(s)." });
     return;
   }
 
   db.connect();
 
   if (db.client.db("calcetto").collection("users").findOne({ username: req.body.username })) {
-    res.header(409).json({ error: "User already exists." });
-    res.end();
+    res.status(409).json({ error: "User already exists." });
     return;
   }
 
@@ -53,48 +55,48 @@ router.post("/signup", (req, res) => {
 
   user.hashed_psw, user.salt = hashPassword(req.body.password);
   if (!user.hashed_psw || !user.salt) {
-    res.header(500).json({ error: "An error occurred while processing your credentials." });
-    res.end();
+    res.status(500).json({ error: "An error occurred while processing your credentials." });
     return;
   }
 
   db.client.db("calcetto").collection("users").insertOne(user);
   if (!db.client.db("calcetto").collection("users").findOne(user)) {
-    res.header(500).json({ error: "An error occurred creating your account." });
-    res.end();
+    res.status(500).json({ error: "An error occurred creating your account." });
     return;
   }
 
-  res.header(201).json(user);
-  res.end();
+  res.status(201).json(user);
 });
 
 // POST  /api/auth/signin  User login
-router.post("/signin", (req, res) => {
+router.post("/signin", async (req, res) => { 
   if (!req.body.password || !req.body.username) {
-    res.header(400).json({ error: "Missing login information." });
-    res.end();
+    res.status(400).json({ error: "Missing required field(s)." });
     return;
   }
 
-  const user = {
-    username: req.body.username,
-    password: req.body.password,
-  };
+  db.connect();
 
-  if (!authenticate(user.username, user.password)) {
-    res.header(409).json({ error: "Invalid credentials." });
-    res.end();
+  const user = await db.client
+    .db("calcetto")
+    .collection("users")
+    .findOne({ username: req.body.username });
+
+  if (!user || !passwordIsValid(req.body.password, user.salt, user.hashed_psw)) {
+    res.status(400).json({ error: "Invalid credentials." });
     return;
   }
 
-  const token = jwt.sign({ username: user.username }, "calcetto", {
-    expiresIn: 86400,
-  });
-  res.header(200);
+  const token = jwt.sign(
+    { username: user.username },
+    "calcetto",
+    { expiresIn: 86400 }
+  );
+
+  res.status(200);
   res.cookie("token", token, { httpOnly: true });
   res.json({ username: user.username });
-  res.end();
 });
+
 
 module.exports = router;
