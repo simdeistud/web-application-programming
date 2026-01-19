@@ -11,14 +11,16 @@ router.use("/tournaments", tournaments);
 router.use("/matches", matches);
 
 // GET  /api/whoami  If authenticated, returns information about the current user
-router.get("/whoami", (req, res, next) => {
-  if ("user is authenticated") {
-    res.header(200).json({ user });
-    res.end();
-    return;
-  }
-  res.header(401).json({ error: "Not authenticated" });
-  res.end();
+router.get("/whoami", auth.authenticate, async (req, res, next) => {
+  const user_info = await db.client
+      .db("calcetto")
+      .collection("users")
+      .findOne({ username: req.body.username });
+  return res.status(201).json({
+    username: user_info.username,
+    name: user_info.name,
+    surname: user_info.surname
+  });
 });
 
 module.exports = router;
