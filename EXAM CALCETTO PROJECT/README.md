@@ -20,7 +20,7 @@ user = {
 ### Field information
 
 A field can support one **sport type** between _football_, _volleyball_, and _basketball_. A facility which has more than one field should have a single
-entry for each field. Each field has a list of _N_ time slots that can be allocated each day, and a list of _M_ bookings.
+entry for each field. Time is local time.
 ```
 field = {
     String::id,
@@ -31,24 +31,26 @@ field = {
     String::description,
     Time::opening_time,
     Time::closing_time,
-    Timeslot[]::timeslot = {
-        Datetime::starting_hour,
-        Datetime::ending_hour,
-    }
-    Booking[]::booking
 }
 ```
+### Booking slots
 
-### Booking information
-
-A **booking** is always included inside a _field_ object, thus there is no need to identify them separately. A _booker_ is the username of the user who booked the field. The booking refers to the _i-th_ slot provided by the field on a given date.
+A booking slot for a field can only be created by the administrator. It has the following information:
 ```
-booking = {
-    String::booker,
-    Date::date,
-    int::slot
+booking_slot = {
+    String::slot_id,
+    String::field_id,
+    Date::slot_date,
+    Time::start_time,
+    Time::end_time,
+    String::booker [default = None]
 }
 ```
+It is clear that booking slots for the same field with overlapping hours are not legal.
+
+By default a booking is created with no booker. If a booking has no booker it is considered free for booking. Once a user books the slot, the booker field can only be returned to None by the booker itself or the administrator.
+
+It is responsibility of the admin to add slots according to their schedule. Times are local, and past slots cannot be booked even if free.
 
 ## Session design
 
