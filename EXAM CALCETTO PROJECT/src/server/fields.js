@@ -41,8 +41,24 @@ router.get("/:id", async (req, res) => {
 
 
 // GET  /api/fields/:id/slots?date=YYYY-MM-DD  Availability for a specific date
-router.get("", (req, res) => {
-
+router.get("/:id/slots", async (req, res) => {
+    try {
+        const id = req.params.id;
+        const date = req.query.date || "";
+        const slots = await db.client
+            .db("calcetto")
+            .collection("booking_slots")
+            .find({
+                field_id: id,
+                slot_date: date,
+                booker: null
+            })
+            .toArray();
+        return res.status(200).json({ slots });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
 });
 
 
