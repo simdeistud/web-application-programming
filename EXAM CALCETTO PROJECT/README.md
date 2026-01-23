@@ -70,7 +70,7 @@ team = {
 ```
 
 ### Matches information
-Matches are created automatically by the system. Users can only create tournaments.
+Matches are created automatically by the system. Users can only create tournaments. Only the tournament creator can input the result of its matches.
 
 ```
 match = {
