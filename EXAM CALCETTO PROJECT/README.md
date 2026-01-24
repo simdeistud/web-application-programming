@@ -70,7 +70,7 @@ team = {
 ```
 
 ### Matches information
-Matches are created automatically by the system. Users can only create tournaments. Only the tournament creator can input the result of its matches.
+Matches are created automatically by the system. Users can only create tournaments. Only the tournament creator can input the result of its matches. Once the results have been inputted, the status is automatically marked as played.
 
 ```
 match = {
@@ -82,12 +82,16 @@ match = {
         String[]::team_names,
         Date::match_date,
         String::status, [default = upcoming]
-        String::result [default = None]
+        results[] = {
+            String::team_name,
+            Int::score
+        } [default = None]
     }   
 }
 ```
 
 ### Tournament information
+Standings are computed by analysing the played matches.
 ```
 tournament = {
     String::tournament_id, [UNIQUE]
@@ -100,15 +104,6 @@ tournament = {
         String::information,
         String[]::team_names,
         Match[]::matches
-        standings = {
-            String::status,
-            score[] = {
-                String::team,
-                Int::score
-            }
-            String::winner [default = None]
-            Date::finish_date [default = None]
-        }
     }
 }
 ```
