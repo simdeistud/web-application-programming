@@ -23,10 +23,10 @@ router.get("/:id", async (req, res) => {
 router.put("/:id/result", authenticate, async (req, res) => {
     try {
         const { id } = req.params;
-        const { winner } = req.body;
+        const { results } = req.body;
 
-        if (winner === undefined) {
-            return res.status(400).json({ error: "Missing winner" });
+        if (results === undefined) {
+            return res.status(400).json({ error: "Missing results" });
         }
 
         const match = await db.client
@@ -43,7 +43,8 @@ router.put("/:id/result", authenticate, async (req, res) => {
             .collection("matches")
             .updateOne(
                 { match_id: id },
-                // TODO
+                { $set: { "details.results": results } },
+                { $set: { "details.status": "played" } }
             );
 
         return res.status(200).json({ message: "Match result updated successfully" });
