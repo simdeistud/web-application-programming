@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SPORTS TERMINAL TRIESTE</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <script src="../js/ui.js" defer></script>
+    <script src="../js/client.js" defer></script>
+</head>
+
+<body>
+    <!-- ===== Terminal Navbar ===== -->
+    <nav class="term-bar" role="navigation" aria-label="Primary">
+        <div class="bar-inner">
+            <!-- Left: brand + dropdowns -->
+            <div class="left">
+                <div class="brand">[SPORTS TERMINAL TRIESTE]</div>
+
+                <!-- TEAMS -->
+                <div class="dropdown">
+                    <button class="drop-btn" aria-haspopup="true" aria-expanded="false" aria-controls="menu-teams">
+                        TEAMS <span class="chev" aria-hidden="true"></span>
+                    </button>
+                    <div id="menu-teams" class="menu" role="menu" aria-label="Teams submenu">
+                        <a href="/teams">Explore Teams</a>
+                        <a href="/teams/create">Create Team</a>
+                        <a href="/teams/mine">My Teams</a>
+                    </div>
+                </div>
+
+                <!-- TOURNAMENTS -->
+                <div class="dropdown">
+                    <button class="drop-btn" aria-haspopup="true" aria-expanded="false"
+                        aria-controls="menu-tournaments">
+                        TOURNAMENTS <span class="chev" aria-hidden="true"></span>
+                    </button>
+                    <div id="menu-tournaments" class="menu" role="menu" aria-label="Tournaments submenu">
+                        <a href="/tournaments">Explore Tournaments</a>
+                        <a href="/tournaments/create">Create Tournament</a>
+                        <a href="/tournaments/mine">My Tournaments</a>
+                    </div>
+                </div>
+
+                <!-- BOOKINGS -->
+                <div class="dropdown">
+                    <button class="drop-btn" aria-haspopup="true" aria-expanded="false" aria-controls="menu-bookings">
+                        BOOKINGS <span class="chev" aria-hidden="true"></span>
+                    </button>
+                    <div id="menu-bookings" class="menu" role="menu" aria-label="Bookings submenu">
+                        <a href="/book">Book a Field</a>
+                        <a href="/bookings/manage">Manage Bookings</a>
+                        <a href="/bookings/history">Booking History</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center: search -->
+            <div class="center">
+                <input class="search" type="search" name="q" placeholder="SEARCH: FIELDS / TEAMS / TOURNAMENTS"
+                    aria-label="Search query" autocomplete="off" required />
+                <div class="dropdown" style="position:relative;">
+                    <button type="button" class="filter-btn" id="filter-button" aria-haspopup="listbox"
+                        aria-expanded="false" aria-controls="filter-menu">
+                        FILTER: <span id="filter-label">ALL</span> <span class="chev" aria-hidden="true"></span>
+                    </button>
+                    <div id="filter-menu" class="filter-menu" role="listbox" aria-labelledby="filter-button">
+                        <button class="filter-option" role="option" data-value="all">All</button>
+                        <button class="filter-option" role="option" data-value="fields">Fields</button>
+                        <button class="filter-option" role="option" data-value="teams">Teams</button>
+                        <button class="filter-option" role="option" data-value="tournaments">Tournaments</button>
+                    </div>
+                    <input type="hidden" name="type" id="filter-value" value="all" />
+                </div>
+                <button class="btn" type="submit" aria-label="Execute search">EXECUTE</button>
+                </form>
+            </div>
+
+            <!-- Right: auth -->
+            <div class="right">
+                <!-- AUTH NOTE:
+             If NOT authenticated: show Login + Register (as below).
+             If authenticated: replace Login with "My Profile" and, optionally, Register -> Logout.
+        -->
+                <button class="btn" type="submit" aria-label="Login">[LOGIN]</button>
+                <button class="btn" type="submit" aria-label="Register">[REGISTER]</button>
+
+                <!-- Example (authenticated state) — DO NOT ENABLE HERE:
+             <button type="submit" aria-label="My Profile">[ MY PROFILE ]</button>
+             <button type="submit" aria-label="Logout">[ LOGOUT ]</button>
+        -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== Content (terminal frame) ===== -->
+    <main role="main">
+        <div class="frame" aria-label="terminal-viewport">
+            <div class="hline">──────────────────────────────────────────────────────────</div>
+            <p>WELCOME TO CALCETTO TERMINAL INTERFACE v1.0 (AMBER)</p>
+            <p>USE TOP MENU TO NAVIGATE • TYPE IN SEARCH AND PRESS <strong>EXECUTE</strong></p>
+            <div class="hline">──────────────────────────────────────────────────────────</div>
+            <p>STATUS: READY <span class="blink" aria-hidden="true"></span></p>
+        </div>
+    </main>
+</body>
+
+</html>
