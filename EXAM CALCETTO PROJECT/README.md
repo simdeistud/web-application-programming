@@ -98,12 +98,12 @@ tournament = {
     String::name
     String::sport_type,
     Date::start_date,
-    Int::max_teams, [default = 2]
+    Int::max_teams,
     String::creator
     details = {
         String::information,
         String[]::team_names,
-        Match[]::matches
+        String[]::matches
     }
 }
 ```

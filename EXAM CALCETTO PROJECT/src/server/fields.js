@@ -19,8 +19,6 @@ router.get("", async (req, res) => {
     }
 });
 
-
-
 // GET /api/fields/:id  Field details
 router.get("/:id", async (req, res) => {
     try {
@@ -38,7 +36,6 @@ router.get("/:id", async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 });
-
 
 // GET  /api/fields/:id/slots?date=YYYY-MM-DD  Availability for a specific date
 router.get("/:id/slots", async (req, res) => {
