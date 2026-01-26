@@ -1,4 +1,5 @@
 const express = require("express");
+const auth = require("./auth.js");
 const router = express.Router();
 
 // GET  /api/fields?q=query  List of sports fields (searchable)
@@ -60,7 +61,7 @@ router.get("/:id/slots", async (req, res) => {
 
 
 // POST /api/fields/:id/bookings
-router.post("/:id/bookings", authenticate, async (req, res) => {
+router.post("/:id/bookings", auth.authenticate, async (req, res) => {
     try {
         const fieldId = req.params.id;
         const { slot_id } = req.body;
@@ -107,7 +108,7 @@ router.post("/:id/bookings", authenticate, async (req, res) => {
 
 
 // DELETE /api/fields/:id/bookings/:bookingId
-router.delete("/:id/bookings/:bookingId", authenticate, async (req, res) => {
+router.delete("/:id/bookings/:bookingId", auth.authenticate, async (req, res) => {
     try {
         const fieldId = req.params.id;
         const bookingId = req.params.bookingId;

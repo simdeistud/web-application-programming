@@ -1,4 +1,5 @@
 const express = require("express");
+const auth = require("./auth.js");
 const router = express.Router();
 
 // GET  /api/tournaments/:id/standings  Tournament standings
