@@ -1,102 +1,117 @@
-const express = require("express");
+// auth.js
+const express = require('express');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const db = require('./db.js');
+
 const router = express.Router();
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const db = require("./db.js");
-const { deepStrictEqual } = require("assert");
+
+// --- Password hashing helpers (PBKDF2-SHA512). Consider Argon2/bcrypt in prod.
+const PBKDF2_ITERS = 100000; // raise as needed
+const SALT_BYTES = 16;
 
 const hashPassword = (password) => {
-  const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto
-    .pbkdf2Sync(password, salt, 1000, 64, "sha512")
-    .toString("hex");
-  return { salt, hash };
+  const salt = crypto.randomBytes(SALT_BYTES).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, PBKDF2_ITERS, 64, 'sha512').toString('hex');
+  return { salt, hash, iters: PBKDF2_ITERS, algo: 'sha512' };
 };
 
-const passwordIsValid = (password, salt, storedHash) => {
-  const hash = crypto
-    .pbkdf2Sync(password, salt, 1000, 64, "sha512")
-    .toString("hex");
-  return hash === storedHash;
+const passwordIsValid = (password, salt, storedHash, iters = PBKDF2_ITERS) => {
+  const hash = crypto.pbkdf2Sync(password, salt, iters, 64, 'sha512').toString('hex');
+  return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(storedHash, 'hex'));
 };
 
+// --- Auth middleware: reads Bearer token, sets req.user
 const authenticate = (req, res, next) => {
-    const auth = req.headers.authorization;
-    if (!auth?.startsWith("Bearer ")) return res.sendStatus(401);
-    const token = auth.split(" ")[1];
-    try {
-        req.body.username = jwt.verify(token, process.env.JWT_SECRET);
-        next();
-    } catch {
-        return res.sendStatus(401);
+  const hdr = req.headers.authorization;
+  if (!hdr?.startsWith('Bearer ')) return res.sendStatus(401);
+  const token = hdr.slice(7);
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+    // payload expected: { username, iat, exp, ... }
+    req.user = { username: payload.username };
+    next();
+  } catch {
+    return res.sendStatus(401);
+  }
+};
+
+// POST /api/auth/signup
+router.post('/signup', async (req, res, next) => {
+  try {
+    const { username, password, name, surname } = req.body || {};
+    if (!username || !password || !name || !surname) {
+      return res.status(400).json({ error: 'Missing required field(s).' });
     }
-}
+    if (typeof username !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ error: 'Invalid field type(s).' });
+    }
 
+    await db.connect();
 
-// POST  /api/auth/signup  Register a new user
-router.post("/signup", (req, res) => {
-  if (!req.body.password || !req.body.username || !req.body.name || !req.body.surname) {
-    res.status(400).json({ error: "Missing required field(s)." });
-    return;
+    const users = db.client.db('calcetto').collection('users');
+    // Ensure unique index exists (idempotent)
+    await users.createIndex({ username: 1 }, { unique: true });
+
+    const existing = await users.findOne({ username });
+    if (existing) return res.status(409).json({ error: 'User already exists.' });
+
+    const { salt, hash, iters, algo } = hashPassword(password);
+    const userDoc = {
+      username,
+      name,
+      surname,
+      salt,
+      hashed_psw: hash,
+      iters,
+      algo,
+      createdAt: new Date()
+    };
+
+    await users.insertOne(userDoc);
+
+    // Do NOT return secrets
+    return res.status(201).json({ username, name, surname });
+  } catch (err) {
+    // Handle duplicate key race (E11000)
+    if (err?.code === 11000) {
+      return res.status(409).json({ error: 'User already exists.' });
+    }
+    return next(err);
   }
-
-  db.connect();
-
-  if (db.client.db("calcetto").collection("users").findOne({ username: req.body.username })) {
-    res.status(409).json({ error: "User already exists." });
-    return;
-  }
-
-  const user = {
-    username: req.body.username,
-    name: req.body.name,
-    surname: req.body.surname,
-  };
-
-  user.hashed_psw, user.salt = hashPassword(req.body.password);
-  if (!user.hashed_psw || !user.salt) {
-    res.status(500).json({ error: "An error occurred while processing your credentials." });
-    return;
-  }
-
-  db.client.db("calcetto").collection("users").insertOne(user);
-  if (!db.client.db("calcetto").collection("users").findOne(user)) {
-    res.status(500).json({ error: "An error occurred creating your account." });
-    return;
-  }
-
-  res.status(201).json(user);
 });
 
-// POST  /api/auth/signin  User login
-router.post("/signin", async (req, res) => { 
-  if (!req.body.password || !req.body.username) {
-    res.status(400).json({ error: "Missing required field(s)." });
-    return;
+// POST /api/auth/signin
+router.post('/signin', async (req, res, next) => {
+  try {
+    const { username, password } = req.body || {};
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Missing required field(s).' });
+    }
+
+    await db.connect();
+
+    const user = await db.client
+      .db('calcetto')
+      .collection('users')
+      .findOne({ username }, { projection: { _id: 0, username: 1, salt: 1, hashed_psw: 1, iters: 1 } });
+
+    if (!user || !passwordIsValid(password, user.salt, user.hashed_psw, user.iters)) {
+      // Do not reveal which part failed
+      return res.status(400).json({ error: 'Invalid credentials.' });
+    }
+
+    const token = jwt.sign(
+      { username: user.username },
+      process.env.JWT_SECRET,        // <— match authenticate
+      { expiresIn: '1d', algorithm: 'HS256' }
+    );
+
+    return res.status(200).json({ token, username: user.username });
+  } catch (err) {
+    return next(err);
   }
-
-  db.connect();
-
-  const user = await db.client
-    .db("calcetto")
-    .collection("users")
-    .findOne({ username: req.body.username });
-
-  if (!user || !passwordIsValid(req.body.password, user.salt, user.hashed_psw)) {
-    res.status(400).json({ error: "Invalid credentials." });
-    return;
-  }
-
-  const token = jwt.sign(
-    { username: user.username },
-    "calcetto",
-    { expiresIn: 86400 }
-  );
-
-  res.status(200);
-  res.cookie("token", token, { httpOnly: true });
-  res.json({ username: user.username });
 });
-
 
 module.exports = router;
+module.exports.authenticate = authenticate;
