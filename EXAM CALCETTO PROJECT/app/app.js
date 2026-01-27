@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
-const api = require("./api.js");
-const port = 8000;
+const api = require("./routers/api.js");
+const port = 3000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
