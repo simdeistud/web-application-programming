@@ -2,7 +2,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const db = require('../data/db.js');
+const db = require('../app/data/db.js');
 
 const router = express.Router();
 
