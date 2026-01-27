@@ -24,7 +24,7 @@ if (loginButton && registerButton) {
                 const username = document.getElementById('login-username').value;
                 const password = document.getElementById('login-password').value;
                 console.log(`Logging in with Username: ${username}, Password: ${password}`);
-                fetch("http://localhost:8000/api/auth/signin", {
+                fetch("http://localhost:3000/api/auth/signin", {
                     method: "POST",
                     body: JSON.stringify({
                         username: username,
@@ -34,8 +34,8 @@ if (loginButton && registerButton) {
                         "Content-type": "application/json; charset=UTF-8"
                     }
                 })
-                .then((response) => response.json())
-                .then((json) => console.log(json));
+                    .then((response) => response.json())
+                    .then((json) => console.log(json));
             });
         }
     });
@@ -70,6 +70,20 @@ if (loginButton && registerButton) {
                 const password = document.getElementById('register-password').value;
                 console.log(`Registering with Username: ${username}, First Name: ${firstName}, Last Name: ${lastName}, Password: ${password}`);
                 // Add your registration logic here
+                fetch("http://localhost:3000/api/auth/signup", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        username: username,
+                        name: firstName,
+                        surname: lastName,
+                        password: password
+                    }),
+                    headers: {
+                        "Content-type": "application/json; charset=UTF-8"
+                    }
+                })
+                    .then((response) => response.json())
+                    .then((json) => console.log(json));
             });
         }
     });

@@ -1,7 +1,6 @@
-// db.js
 const { MongoClient } = require('mongodb');
 
-const uri = 'mongodb://127.0.0.1:27017';
+const uri = "mongodb://mongo:27017";
 let client;
 let clientPromise;
 

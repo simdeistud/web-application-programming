@@ -1,6 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const db = require('../config/db.js');
+const { getDb } = require('../config/db.js');
 const { hashPassword, passwordIsValid } = require('../utils/password.util');
 
 const router = express.Router();
@@ -13,8 +13,7 @@ router.post('/signup', async (req, res, next) => {
       return res.status(400).json({ error: 'Missing required field(s).' });
     }
 
-    await db.connect();
-    const users = db.client.db('exam-project').collection('users');
+    const users = getDb().collection('users');
 
     await users.createIndex({ username: 1 }, { unique: true });
 
@@ -52,10 +51,7 @@ router.post('/signin', async (req, res, next) => {
       return res.status(400).json({ error: 'Missing required field(s).' });
     }
 
-    await db.connect();
-
-    const user = await db.client
-      .db('exam-project')
+    const user = await getDb()
       .collection('users')
       .findOne(
         { username },
