@@ -6,6 +6,8 @@ services:
     command: nodemon app.js
     ports:
       - "3000:3000"
+    env_file:
+      - ./init/.env
     volumes:
       - ./app:/usr/src/app
       - /usr/src/app/node_modules

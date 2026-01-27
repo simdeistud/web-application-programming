@@ -55,7 +55,6 @@ router.post('/signin', async (req, res, next) => {
       .collection('users')
       .findOne(
         { username },
-        { projection: { _id: 0, username: 1, salt: 1, hashed_psw: 1, iters: 1 } }
       );
 
     if (!user || !passwordIsValid(password, user.salt, user.hashed_psw, user.iters)) {
