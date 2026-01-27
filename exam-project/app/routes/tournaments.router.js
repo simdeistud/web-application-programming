@@ -1,5 +1,5 @@
 const express = require("express");
-const auth = require("./auth.js");
+const authenticate = require("../middleware/auth.middleware.js");
 const router = express.Router();
 
 // GET  /api/tournaments/:id/standings  Tournament standings

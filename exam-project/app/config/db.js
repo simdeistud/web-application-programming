@@ -14,7 +14,7 @@ async function connect() {
   return client;
 }
 
-function getDb(name = 'calcetto') {
+function getDb(name = 'exam-project') {
   if (!client) throw new Error('Mongo client not initialized. Call connect() first.');
   return client.db(name);
 }

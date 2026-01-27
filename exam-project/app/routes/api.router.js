@@ -1,9 +1,10 @@
 const express = require('express');
-const auth = require('./auth.js');
-const db = require('./db.js');
-const fields = require('./fields.js');
-const tournaments = require('./tournaments.js');
-const matches = require('./matches.js');
+const auth = require('./auth.router.js');
+const authenticate = require("../middleware/auth.middleware.js");
+const db = require('../config/db.js');
+const fields = require('./fields.router.js');
+const tournaments = require('./tournaments.router.js');
+const matches = require('./matches.router.js');
 
 const router = express.Router();
 
@@ -13,9 +14,9 @@ router.use('/tournaments', tournaments);
 router.use('/matches', matches);
 
 // GET /api/whoami - returns current user info (authenticated)
-router.get('/whoami', auth.authenticate, async (req, res, next) => {
+router.get('/whoami', authenticate, async (req, res, next) => {
   try {
-    const user = await db.client.db('calcetto').collection('users').findOne(
+    const user = await db.client.db('exam-project').collection('users').findOne(
       { username: req.user.username },
       { projection: { _id: 0, username: 1, name: 1, surname: 1 } }
     );

@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const api = require("./routes/api.js");
+const api = require("./routes/api.router.js");
 const port = 3000;
 
 app.use(express.urlencoded({ extended: true }));
