@@ -19,12 +19,12 @@ if (loginButton && registerButton) {
         `;
         const loginFormButton = document.getElementById('btn-login-form');
         if (loginFormButton) {
-            loginFormButton.addEventListener('click', (event) => {
+            loginFormButton.addEventListener('click', async (event) => {
                 event.preventDefault();
                 const username = document.getElementById('login-username').value;
                 const password = document.getElementById('login-password').value;
                 console.log(`Logging in with Username: ${username}, Password: ${password}`);
-                fetch("http://localhost:3000/api/auth/signin", {
+                const response = await fetch("http://localhost:3000/api/auth/signin", {
                     method: "POST",
                     body: JSON.stringify({
                         username: username,
@@ -34,8 +34,7 @@ if (loginButton && registerButton) {
                         "Content-type": "application/json; charset=UTF-8"
                     }
                 })
-                    .then((response) => response.json())
-                    .then((json) => console.log(json));
+                console.log(response.json());
             });
         }
     });
@@ -61,7 +60,7 @@ if (loginButton && registerButton) {
         `;
         const registerFormButton = document.getElementById('btn-register-form');
         if (registerFormButton) {
-            registerFormButton.addEventListener('click', (event) => {
+            registerFormButton.addEventListener('click', async (event) => {
                 event.preventDefault();
                 // Handle registration form submission
                 const username = document.getElementById('register-username').value;
@@ -70,7 +69,7 @@ if (loginButton && registerButton) {
                 const password = document.getElementById('register-password').value;
                 console.log(`Registering with Username: ${username}, First Name: ${firstName}, Last Name: ${lastName}, Password: ${password}`);
                 // Add your registration logic here
-                fetch("http://localhost:3000/api/auth/signup", {
+                const response = await fetch("http://localhost:3000/api/auth/signup", {
                     method: "POST",
                     body: JSON.stringify({
                         username: username,
@@ -82,8 +81,7 @@ if (loginButton && registerButton) {
                         "Content-type": "application/json; charset=UTF-8"
                     }
                 })
-                    .then((response) => response.json())
-                    .then((json) => console.log(json));
+                console.log(response.json());
             });
         }
     });

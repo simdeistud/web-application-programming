@@ -39,7 +39,7 @@ router.post('/signup', async (req, res, next) => {
     if (err?.code === 11000) {
       return res.status(409).json({ error: 'User already exists.' });
     }
-    next(err);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -70,7 +70,7 @@ router.post('/signin', async (req, res, next) => {
 
     return res.status(200).json({ token, username: user.username });
   } catch (err) {
-    next(err);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
