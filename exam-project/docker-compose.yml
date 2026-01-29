@@ -3,7 +3,7 @@ version: "3.9"
 services:
   app:
     build: .
-    command: nodemon --watch /usr/src/exam-project -e js app.js
+    command: nodemon --watch /usr/src/app -e js app.js
     ports:
       - "3000:3000"
     env_file:
@@ -15,10 +15,14 @@ services:
       - mongo
 
   mongo:
-    image: docker.io/library/mongo:noble
+    image: docker.io/mongo:noble
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_DATABASE: exam-project
     volumes:
       - mongo-data:/data/db
-      - ./init:/init
+      - ./init:/docker-entrypoint-initdb.d:ro
     ports:
       - "27017:27017"
 
