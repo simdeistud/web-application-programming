@@ -1,5 +1,5 @@
 const express = require("express");
-const authenticateMiddleware = require("../middleware/auth.middleware.js");
+const { authenticate } = require('../middleware/auth.middleware.js');
 
 const router = express.Router();
 
@@ -62,7 +62,7 @@ router.get("/:id/slots", async (req, res) => {
 
 
 // POST /api/fields/:id/bookings
-router.post("/:id/bookings", authenticateMiddleware, async (req, res) => {
+router.post("/:id/bookings", authenticate, async (req, res) => {
     try {
         const fieldId = req.params.id;
         const { slot_id } = req.body;
@@ -109,7 +109,7 @@ router.post("/:id/bookings", authenticateMiddleware, async (req, res) => {
 
 
 // DELETE /api/fields/:id/bookings/:bookingId
-router.delete("/:id/bookings/:bookingId", authenticateMiddleware, async (req, res) => {
+router.delete("/:id/bookings/:bookingId", authenticate, async (req, res) => {
     try {
         const fieldId = req.params.id;
         const bookingId = req.params.bookingId;

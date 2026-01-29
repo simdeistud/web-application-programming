@@ -3,7 +3,7 @@ version: "3.9"
 services:
   app:
     build: .
-    command: nodemon app.js
+    command: nodemon --watch /usr/src/exam-project -e js app.js
     ports:
       - "3000:3000"
     env_file:

@@ -1,5 +1,8 @@
 const loginButton = document.getElementById('btn-login');
 const registerButton = document.getElementById('btn-register');
+const myaccountButton = document.getElementById('btn-myaccount');
+const logoutButton = document.getElementById('btn-logout');
+let accessToken = null
 
 if (loginButton && registerButton) {
     loginButton.addEventListener('click', () => {
@@ -34,7 +37,13 @@ if (loginButton && registerButton) {
                         "Content-type": "application/json; charset=UTF-8"
                     }
                 })
-                console.log(response.json());
+                if (response.ok) {
+                    accessToken = (await response.json()).token;
+                    console.log("Login successful, access token stored.");
+                } else {
+                    alert("Error: " + (await response.json()).error);
+                    console.error("Login failed.");
+                }
             });
         }
     });
@@ -80,9 +89,40 @@ if (loginButton && registerButton) {
                     headers: {
                         "Content-type": "application/json; charset=UTF-8"
                     }
-                })
-                console.log(response.json());
+                }).then(r => r.json())
+                console.log(response);
             });
         }
+    });
+}
+
+if (myaccountButton && logoutButton) {
+    myaccountButton.addEventListener('click', async () => {
+        if (!accessToken) {
+            alert("You must be logged in to access your account.");
+            return;
+        }
+        const response = await fetch("http://localhost:3000/api/whoami", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${accessToken}`
+            }
+        });
+        if (response.ok) {
+            const userData = await response.json();
+            const frame = document.querySelector('main');
+            frame.innerHTML = `
+            <h2>My Account</h2>
+            <p>Username: ${userData.username}</p>
+            <p>Full Name: ${userData.name} ${userData.surname}</p>
+            `;
+        } else {
+            alert("Error: " + (await response.json()).error);
+        }
+
+        logoutButton.addEventListener('click', () => {
+        accessToken = null;
+        alert("You have been logged out.");
+    });
     });
 }

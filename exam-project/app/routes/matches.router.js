@@ -1,5 +1,5 @@
 const express = require("express");
-const authenticateMiddleware = require("../middleware/auth.middleware.js");
+const { authenticate } = require('../middleware/auth.middleware.js');
 const router = express.Router();
 
 //  GET  /api/matches/:id  Match details
@@ -21,7 +21,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // PUT  /api/matches/:id/result  Enter match result
-router.put("/:id/result", authenticateMiddleware, async (req, res) => {
+router.put("/:id/result", authenticate, async (req, res) => {
     try {
         const { id } = req.params;
         const { results } = req.body;
