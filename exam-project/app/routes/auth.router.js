@@ -39,7 +39,7 @@ router.post("/signup", async (req, res) => {
       algo,
       createdAt: new Date()
     });
-
+    console.log(`User "${username}" created.`);
     return res.status(201).json({ username, name, surname });
   } catch (err) {
     if (err?.code === 11000) {
@@ -51,7 +51,7 @@ router.post("/signup", async (req, res) => {
 
 // POST /api/auth/signin
 router.post("/signin", async (req, res) => {
-  try {
+  try {api/whoami
     const { username, password } = req.body || {};
     if (!username || !password) {
       return res.status(400).json({ error: "Missing required field(s)." });
@@ -66,7 +66,7 @@ router.post("/signin", async (req, res) => {
     });
 
     setAuthCookie(res, token, ACCESS_TTL);
-
+    console.log(`User "${user.username}" logged in.`);
     return res.status(200).json({ username: user.username });
   } catch {
     return res.status(500).json({ error: "Internal server error" });
@@ -76,6 +76,7 @@ router.post("/signin", async (req, res) => {
 // POST /api/auth/logout
 router.post("/logout", (req, res) => {
   clearAuthCookie(res);
+  console.log(`User "${req.user.username}" logged out.`);
   return res.sendStatus(204);
 });
 

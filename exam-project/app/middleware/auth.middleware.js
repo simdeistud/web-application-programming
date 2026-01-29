@@ -13,6 +13,7 @@ function authenticate(req, res, next) {
       algorithms: ["HS256"]
     });
     req.user = { sub: payload.sub, username: payload.username };
+    console.log(`User "${req.user.username}" correctly authenticated.`);
     next();
   } catch {
     return res.sendStatus(401);
