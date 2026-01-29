@@ -4,7 +4,8 @@ const crypto = require("crypto");
 
 const {
   setAuthCookie,
-  clearAuthCookie
+  clearAuthCookie,
+  authenticate
 } = require("../middleware/auth.middleware.js");
 
 const { getDb } = require("../config/db.js");
@@ -51,7 +52,7 @@ router.post("/signup", async (req, res) => {
 
 // POST /api/auth/signin
 router.post("/signin", async (req, res) => {
-  try {api/whoami
+  try {
     const { username, password } = req.body || {};
     if (!username || !password) {
       return res.status(400).json({ error: "Missing required field(s)." });
@@ -74,10 +75,15 @@ router.post("/signin", async (req, res) => {
 });
 
 // POST /api/auth/logout
-router.post("/logout", (req, res) => {
-  clearAuthCookie(res);
+router.post("/logout", authenticate, (req, res) => {
+  try {
+    clearAuthCookie(res);
   console.log(`User "${req.user.username}" logged out.`);
-  return res.sendStatus(204);
+    return res.sendStatus(204);
+  } catch {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+  
 });
 
 module.exports = router;
