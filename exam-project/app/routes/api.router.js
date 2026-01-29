@@ -18,7 +18,7 @@ router.get('/whoami', authenticate, async (req, res, next) => {
   try {
     const user = await getDb().collection("users").findOne({ username: req.user.username });
     if (!user) return res.status(404).json({ error: 'User not found' });
-    return res.status(200).json(user);
+    return res.status(200).json({ username: user.username, name: user.name, surname: user.surname });
   } catch (e) {
     return res.status(500).json({ error: 'Internal server error' });
   }
