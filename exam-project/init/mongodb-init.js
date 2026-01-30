@@ -3,7 +3,7 @@
 // --- Config ---
 const DB_NAME = "exam-project";
 const APP_USER = "admin";
-const APP_PWD  = "admin";
+const APP_PWD = "admin";
 
 // --- Select app DB ---
 const appDb = db.getSiblingDB(DB_NAME);
@@ -50,5 +50,25 @@ ensureCollection(appDb, "users");
 ensureCollection(appDb, "fields");
 ensureCollection(appDb, "tournaments");
 ensureCollection(appDb, "matches");
+
+appDb.fields.insertOne({
+  name: "Sample Field",
+  type: "Soccer",
+  description: "A standard soccer field.",
+  address: "123 Soccer St, Sportstown",
+  img_uri: `http://localhost:${process.env.WEB_PORT || 3000}/img/fields/field.jpg`,
+  opening_time: "08:00",
+  closing_time: "22:00"
+});
+
+appDb.fields.insertOne({
+  name: "Sample Field2",
+  type: "Basketball",
+  description: "A second standard basketball field.",
+  address: "123 Basket St, Sportstown",
+  img_uri: `http://localhost:${process.env.WEB_PORT || 3000}/img/fields/field2.jpg`,
+  opening_time: "08:01",
+  closing_time: "22:01"
+});
 
 print("Initialization completed.");
