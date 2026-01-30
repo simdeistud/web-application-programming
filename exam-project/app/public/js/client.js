@@ -94,7 +94,6 @@ registerButton.addEventListener('click', async () => {
             const lastName = document.getElementById('register-last-name').value;
             const password = document.getElementById('register-password').value;
             console.log(`Registering with Username: ${username}, First Name: ${firstName}, Last Name: ${lastName}, Password: ${password}`);
-            // Add your registration logic here
             const response = await fetch("http://localhost:3000/api/auth/signup", {
                 method: "POST",
                 body: JSON.stringify({
@@ -110,7 +109,13 @@ registerButton.addEventListener('click', async () => {
             console.log(response);
         });
     }
-    await setUIMode(await hasSession());
+    if (await hasSession()) {
+        await setUIMode(true);
+        frame.innerHTML = `<h2>[WELCOME BACK]</h2><p>[YOU ARE LOGGED IN]</p>`;
+    } else {
+        alert('Registration unsuccessful.');
+        await setUIMode(false);
+    }
 });
 
 myaccountButton.addEventListener('click', async () => {

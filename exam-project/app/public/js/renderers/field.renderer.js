@@ -1,3 +1,5 @@
+import { renderSlotsList } from './booking.renderer.js';
+
 function attachFieldListeners(htmlElement) {
     const list = htmlElement.querySelector('#fields-list');
     if (!list) return;
@@ -39,21 +41,108 @@ export function renderFieldsList(data, htmlElement) {
     attachFieldListeners(htmlElement);
 }
 
+
+function insertCalendar(element, fieldId) {
+    if (!element) {
+        console.error("insertCalendar: element is null");
+        return;
+    }
+
+    const hidden = document.createElement("input");
+    hidden.type = "hidden";
+    hidden.name = `field_id`;
+    hidden.value = fieldId;
+
+    const dateInput = document.createElement("input");
+    dateInput.type = "date";
+    dateInput.required = true;
+
+    const label = document.createElement("label");
+    label.textContent = "Select date:";
+
+    const button = document.createElement("button");
+    button.type = "submit";
+    button.id = "btn-check-slots";
+    button.textContent = "[CHECK AVAILABILITY]";
+    button.addEventListener("click", async () => {
+        const date = dateInput.value;
+        if (!date) {
+            alert("Please select a date.");
+            return;
+        }
+
+        try {
+            const res = await fetch(`http://localhost:3000/api/fields/${fieldId}/slots?date=${date}`, {
+                method: "GET"
+            });
+            if (!res.ok) {
+                alert("Failed to fetch available slots.");
+                return;
+            }
+            const data = await res.json();
+            renderSlotsList(data.slots, document.querySelector('main'));
+            attachSlotEventListeners(document.querySelector('main'));
+        } catch (err) {
+            console.error("Request failed:", err);
+        }
+    });
+
+    element.innerHTML = '';
+    element.appendChild(label);
+    element.appendChild(dateInput);
+    element.appendChild(hidden);
+    element.appendChild(button);
+}
+
+
 export function renderField(field, htmlElement) {
-    let content = '';
+    // Clear container
+    htmlElement.innerHTML = '';
+
     if (!field) {
-        content = '<p>Field empty.</p>';
-        return content;
+        const p = document.createElement('p');
+        p.textContent = 'Field empty.';
+        htmlElement.appendChild(p);
+        return;
     }
-    content += `<h2>${field.name}</h2>`;
-    content += `<p>Type: ${field.type}</p>`;
-    content += `<p>Description: ${field.description}</p>`;
-    content += `<p>Address: ${field.address}</p>`;
+
+    const h2 = document.createElement('h2');
+    h2.textContent = field.name;
+    htmlElement.appendChild(h2);
+
+    const pType = document.createElement('p');
+    pType.textContent = `Type: ${field.type}`;
+    htmlElement.appendChild(pType);
+
+    const pDescription = document.createElement('p');
+    pDescription.textContent = `Description: ${field.description}`;
+    htmlElement.appendChild(pDescription);
+
+    const pAddress = document.createElement('p');
+    pAddress.textContent = `Address: ${field.address}`;
+    htmlElement.appendChild(pAddress);
+
     if (field.img_uri) {
-        content += `<img src="${field.img_uri}" alt="Field Image">`;
+        const img = document.createElement('img');
+        img.src = field.img_uri;
+        img.alt = 'Field Image';
+        htmlElement.appendChild(img);
     }
-    content += `Opening Time: ${field.opening_time}<br>`;
-    content += `Closing Time: ${field.closing_time}<br>`;
-    content += `<button id="btn-book-field" data-field-id="field-${field._id}">Book Field</button>`;
-    htmlElement.innerHTML = content;
+
+    const open = document.createElement('p');
+    open.textContent = `Opening Time: ${field.opening_time}`;
+    htmlElement.appendChild(open);
+
+    const close = document.createElement('p');
+    close.textContent = `Closing Time: ${field.closing_time}`;
+    htmlElement.appendChild(close);
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-book-field';
+    btn.dataset.fieldId = `field-${field._id}`;
+    btn.textContent = 'Book Field';
+    btn.addEventListener('click', () => {
+        insertCalendar(htmlElement, field._id);
+    });
+    htmlElement.appendChild(btn);
 }
