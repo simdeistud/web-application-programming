@@ -4,6 +4,7 @@ const api = require("./routes/api.router.js");
 const { connect } = require('./config/db.js');
 const cookieParser = require("cookie-parser");
 
+app.disable("etag"); // Disable etag headers to avoid caching issues
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
