@@ -43,6 +43,7 @@ router.post("/signup", async (req, res) => {
     console.log(`User "${username}" created.`);
     return res.status(201).json({ username, name, surname });
   } catch (err) {
+    console.error(err);
     if (err?.code === 11000) {
       return res.status(409).json({ error: "User already exists." });
     }
@@ -65,11 +66,11 @@ router.post("/signin", async (req, res) => {
       algorithm: "HS256",
       expiresIn: "15m"
     });
-
     setAuthCookie(res, token, ACCESS_TTL);
     console.log(`User "${user.username}" logged in.`);
     return res.status(200).json({ username: user.username });
-  } catch {
+  } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
