@@ -50,9 +50,12 @@ ensureCollection(appDb, "users");
 ensureCollection(appDb, "fields");
 ensureCollection(appDb, "tournaments");
 ensureCollection(appDb, "matches");
+ensureCollection(appDb, "slots");
+ensureCollection(appDb, "bookings");
+ensureCollection(appDb, "teams");
 
 appDb.fields.insertOne({
-  name: "Sample Field",
+  name: "Sample Football Field",
   type: "Soccer",
   description: "A standard soccer field.",
   address: "123 Soccer St, Sportstown",
@@ -62,7 +65,7 @@ appDb.fields.insertOne({
 });
 
 appDb.fields.insertOne({
-  name: "Sample Field2",
+  name: "Sample Basketball Field",
   type: "Basketball",
   description: "A second standard basketball field.",
   address: "123 Basket St, Sportstown",
@@ -70,5 +73,62 @@ appDb.fields.insertOne({
   opening_time: "08:01",
   closing_time: "22:01"
 });
+
+appDb.slots.insertMany([
+  {
+    field_id: appDb.fields.findOne({ name: "Sample Football Field" })._id,
+    slot_date: "2026-02-20",
+    start_time: "10:00",
+    end_time: "11:00",
+  },
+  {
+    field_id: appDb.fields.findOne({ name: "Sample Football Field" })._id,
+    slot_date: "2026-02-20",
+    start_time: "11:00",
+    end_time: "12:00",
+  },
+  {
+    field_id: appDb.fields.findOne({ name: "Sample Basketball Field" })._id,
+    slot_date: "2026-02-20",
+    start_time: "10:00",
+    end_time: "11:00",
+  }
+]);
+
+/*appDb.teams.insertMany([
+  {
+    name: "Team A",
+    players: [
+      {
+        name: "Pinco",
+        surname: "Pallino",
+        jersey_number: 7
+      },
+      {
+        name: "Mario",
+        surname: "Rossi",
+      },
+      {
+        name: "Luigi",
+        surname: "Verdi",
+        jersey_number: 5
+      }
+    ]
+  },
+  {
+    name: "Team B",
+    players: [
+      {
+        name: "Anna",
+        surname: "Bianchi",
+        jersey_number: 9
+      },
+      {
+        name: "Sara",
+        surname: "Neri",
+      }
+    ]
+  }
+]);*/
 
 print("Initialization completed.");
