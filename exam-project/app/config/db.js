@@ -1,5 +1,5 @@
 // db.js (utility for MongoDB)
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 
 // ---- Config with sensible defaults for your setup ----
 const MONGO_HOST = process.env.MONGO_HOST || 'mongo';
@@ -101,11 +101,16 @@ function registerSignalHandlers() {
   process.once('SIGTERM', shutdown);
 }
 
+function idFromString(idStr) {
+  return new ObjectId(idStr);
+}
+
 module.exports = {
   connect,
   getDb,
   getCollection,
   getClient: () => client,
+  idFromString,
   close,
   registerSignalHandlers,
 };
