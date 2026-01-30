@@ -1,5 +1,6 @@
 const express = require("express");
 const { authenticate } = require('../middleware/auth.middleware.js');
+const { getDb, idFromString } = require("../config/db.js");
 
 const router = express.Router();
 
@@ -7,14 +8,17 @@ const router = express.Router();
 router.get("", async (req, res) => {
     try {
         const q = req.query.q || "";
-        const fields = await db.client
-            .db("calcetto")
+        const fields = await getDb()
             .collection("fields")
             .find({
                 name: { $regex: q, $options: "i" } // "i" stands for case insensitive match
             })
             .toArray();
-        return res.status(200).json({ fields });
+        if (!fields || fields.length === 0) {
+            return res.status(404).json({ error: "No fields found" });
+        }
+        const trimmed = fields.map(({ _id, name }) => ({ _id, name }))
+        return res.status(200).json({ trimmed });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Internal server error" });
@@ -24,11 +28,10 @@ router.get("", async (req, res) => {
 // GET /api/fields/:id  Field details
 router.get("/:id", async (req, res) => {
     try {
-        const id = req.params.id;
-        const field = await db.client
-            .db("calcetto")
+        const id = idFromString(req.params.id);
+        const field = await getDb()
             .collection("fields")
-            .findOne({ id: id });
+            .findOne({ _id: id });
         if (!field) {
             return res.status(404).json({ error: "Field not found" });
         }
@@ -44,8 +47,7 @@ router.get("/:id/slots", async (req, res) => {
     try {
         const id = req.params.id;
         const date = req.query.date || "";
-        const slots = await db.client
-            .db("calcetto")
+        const slots = await getDb()
             .collection("booking_slots")
             .find({
                 field_id: id,
@@ -72,7 +74,7 @@ router.post("/:id/bookings", authenticate, async (req, res) => {
             return res.status(400).json({ error: "slot_id is required" });
         }
 
-        const col = db.client.db("calcetto").collection("booking_slots");
+        const col = getDb().collection("booking_slots");
 
         const slot = await col.findOne({ slot_id, field_id: fieldId });
         if (!slot) {
