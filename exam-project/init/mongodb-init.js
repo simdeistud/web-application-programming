@@ -92,6 +92,12 @@ appDb.slots.insertMany([
     slot_date: "2026-02-20",
     start_time: "10:00",
     end_time: "11:00",
+  },
+  {
+    field_id: appDb.fields.findOne({ name: "Sample Basketball Field" })._id,
+    slot_date: "2026-01-20",
+    start_time: "10:00",
+    end_time: "11:00",
   }
 ]);
 
