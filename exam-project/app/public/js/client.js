@@ -5,6 +5,13 @@ const registerButton = document.getElementById('btn-register');
 const myaccountButton = document.getElementById('btn-myaccount');
 const logoutButton = document.getElementById('btn-logout');
 const searchButton = document.getElementById('btn-search-form');
+const myteamsSelector = document.getElementById('select-myteams');
+const newteamSelector = document.getElementById('select-newteam');
+const mytournamentsSelector = document.getElementById('select-mytournaments');
+const newtournamentSelector = document.getElementById('select-newtournament');
+const upcomingmatchesSelector = document.getElementById('select-upcomingmatches');
+const matcheshistorySelector = document.getElementById('select-matcheshistory');
+
 
 async function hasSession() {
     const res = await fetch("http://localhost:3000/api/whoami", {
@@ -176,3 +183,30 @@ searchButton.addEventListener('click', async () => {
     renderFieldsList(data.trimmed, frame);
 
 });
+
+myteamsSelector.addEventListener('click', () => {
+    alert('My Teams selected (functionality to be implemented)');
+});
+
+newteamSelector.addEventListener('click', () => {
+    alert('New Team selected (functionality to be implemented)');
+});
+
+mytournamentsSelector.addEventListener('click', () => {
+    alert('My Tournaments selected (functionality to be implemented)');
+});
+
+newtournamentSelector.addEventListener('click', () => {
+    alert('New Tournament selected (functionality to be implemented)');
+});
+
+upcomingmatchesSelector.addEventListener('click', () => {
+    alert('Upcoming Matches selected (functionality to be implemented)');
+});
+
+matcheshistorySelector.addEventListener('click', () => {
+    alert('Matches History selected (functionality to be implemented)');
+});
+
+// UI interactions (menus, filters, etc.)
+import './ui.js';

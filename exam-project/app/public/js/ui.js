@@ -1,38 +1,48 @@
 // ===== Utilities: close menus on outside click or Escape =====
 function closeAllMenus() {
-    document.querySelectorAll('.menu.open').forEach(m => m.classList.remove('open'));
-    document.querySelectorAll('.drop-btn[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
-    const filterButton = document.getElementById('filter-button');
-    if (filterButton) filterButton.setAttribute('aria-expanded', 'false');
-    document.getElementById('filter-menu')?.classList.remove('open');
+  // Close dropdowns
+  document.querySelectorAll('.dropdown-content.open').forEach(m => m.classList.remove('open'));
+  document.querySelectorAll('.dropbtn[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+
+  // Close filter menu (kept as-is)
+  const filterButton = document.getElementById('filter-button');
+  if (filterButton) filterButton.setAttribute('aria-expanded', 'false');
+  document.getElementById('filter-menu')?.classList.remove('open');
 }
+
 document.addEventListener('click', (e) => {
-    const isToggle = e.target.closest('.drop-btn');
-    const isMenu = e.target.closest('.menu');
-    const isFilterToggle = e.target.closest('#filter-button');
-    const isFilterMenu = e.target.closest('#filter-menu');
-    if (!isToggle && !isMenu && !isFilterToggle && !isFilterMenu) {
-        closeAllMenus();
-    }
-});
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeAllMenus();
+  const isToggle        = e.target.closest('.dropbtn');             // updated
+  const isMenu          = e.target.closest('.dropdown-content');    // updated
+  const isFilterToggle  = e.target.closest('#filter-button');       // unchanged
+  const isFilterMenu    = e.target.closest('#filter-menu');         // unchanged
+
+  if (!isToggle && !isMenu && !isFilterToggle && !isFilterMenu) {
+    closeAllMenus();
+  }
 });
 
-// ===== Left dropdowns =====
-document.querySelectorAll('.dropdown .drop-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-        const menuId = btn.getAttribute('aria-controls');
-        const menu = document.getElementById(menuId);
-        const isOpen = menu.classList.contains('open');
-        closeAllMenus();
-        if (!isOpen) {
-            menu.classList.add('open');
-            btn.setAttribute('aria-expanded', 'true');
-            const firstItem = menu.querySelector('[role="menuitem"]');
-            if (firstItem) firstItem.focus({ preventScroll: true });
-        }
-    });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeAllMenus();
+});
+
+// ===== Left dropdowns (click-to-toggle; one open at a time) =====
+document.querySelectorAll('.dropdown .dropbtn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    // New structure: the menu is the immediate sibling with class .dropdown-content
+    const menu = btn.nextElementSibling;
+    if (!menu || !menu.classList.contains('dropdown-content')) return;
+
+    const isOpen = menu.classList.contains('open');
+    closeAllMenus();
+    if (!isOpen) {
+      menu.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+
+      // Focus first actionable item
+      const firstItem = menu.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
+      if (firstItem) firstItem.focus({ preventScroll: true });
+    }
+  });
 });
 
 // ===== Search filter =====
@@ -71,21 +81,3 @@ function handleSearchSubmit(e) {
     return false;
 }
 window.handleSearchSubmit = handleSearchSubmit;
-
-// ===== AUTH SWITCH (for reference only; not executed) =====
-// Example:
-// const isAuthenticated = false; // toggle as needed from server template
-// if (isAuthenticated) {
-//   document.getElementById('btn-login')?.replaceWith(Object.assign(document.createElement('a'), {
-//     className: 'btn',
-//     href: '/profile',
-//     id: 'btn-profile',
-//     textContent: '[ MY PROFILE ]'
-//   }));
-//   document.getElementById('btn-register')?.replaceWith(Object.assign(document.createElement('a'), {
-//     className: 'btn',
-//     href: '/logout',
-//     id: 'btn-logout',
-//     textContent: '[ LOGOUT ]'
-//   }));
-// }

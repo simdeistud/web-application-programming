@@ -24,6 +24,10 @@ body {
     height: 100%;
 }
 
+header {
+    display: inline-flex;
+    }
+
 body {
     margin: 0;
     background: var(--term-bg);
@@ -95,6 +99,35 @@ body::after {
     }
 }
 
+/* Images */
+
+/* Global: applies to all images */
+img,
+picture img,
+video,
+canvas {
+  /* Tone: grayscale → amber tint */
+  filter:
+    grayscale(1)
+    contrast(1)
+    brightness(0.9)
+    sepia(1)
+    saturate(2)
+    hue-rotate(10deg)
+    /* Glow layers (phosphor look) */
+    drop-shadow(0 0 3px rgba(255,191,71,0.35))
+    drop-shadow(0 0 8px rgba(255,191,71,0.22))
+    drop-shadow(0 0 16px rgba(255,191,71,0.16));
+  /* Blend helps unify with the dark terminal bg */
+  mix-blend-mode: screen;     /* try 'lighten' or 'plus-lighter' if needed */
+  opacity: 0.98;
+  /* Pixelation */
+  image-rendering: pixelated; /* nearest-neighbor look */
+  image-rendering: crisp-edges; /* fallback */
+  width: 256px;
+}
+
+
 /* ======= Terminal Navbar ======= */
 .term-bar {
     position: sticky;
@@ -135,7 +168,8 @@ body::after {
     position: relative;
 }
 
-.drop-btn {
+/* Trigger button */
+.dropbtn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -149,8 +183,8 @@ body::after {
     text-transform: uppercase;
 }
 
-.drop-btn:hover,
-.drop-btn:focus-visible {
+.dropbtn:hover,
+.dropbtn:focus-visible {
     outline: none;
     border-color: var(--term-bright);
     color: var(--term-bright);
@@ -159,16 +193,8 @@ body::after {
         0 0 12px rgba(255, 210, 122, 0.25);
 }
 
-.chev {
-    display: inline-block;
-    transform: translateY(1px);
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 6px solid var(--term-amber);
-    filter: drop-shadow(0 0 3px rgba(255, 191, 71, 0.35));
-}
-
-.menu {
+/* Popup menu */
+.dropdown-content {
     position: absolute;
     top: calc(100% + 6px);
     left: 0;
@@ -177,15 +203,18 @@ body::after {
     border: 1px solid var(--term-border);
     border-radius: var(--radius);
     box-shadow: inset 0 0 0 1px rgba(255, 191, 71, 0.06);
-    display: none;
+    display: none;          /* hidden by default */
     padding: 4px;
+    z-index: 1000;          /* ensure it overlays */
 }
 
-.menu.open {
+/* Visible state (toggle this class from JS) */
+.dropdown-content.open {
     display: block;
 }
 
-.menu a {
+/* Menu items */
+.dropdown-content a {
     display: block;
     text-decoration: none;
     color: var(--term-amber);
@@ -194,30 +223,34 @@ body::after {
     position: relative;
 }
 
-.menu a:hover,
-.menu a:focus {
+.dropdown-content a:hover,
+.dropdown-content a:focus {
     background: rgba(255, 191, 71, 0.07);
     outline: none;
     color: var(--term-bright);
 }
 
-.menu a::before {
+.dropdown-content a::before {
     content: "> ";
     color: var(--term-dim);
 }
 
-/* Center search (input + filter) */
-.center {
+/* === Search container === */
+#site-search {
     display: flex;
     justify-content: center;
+    width: 100%;
+    margin-top: 12px;
 }
 
-.search {
+/* === Grid layout for the form === */
+#search-form {
     position: relative;
     display: grid;
     grid-template-columns: 1fr auto auto;
     gap: 8px;
     width: 100%;
+    max-width: 900px;
     background: var(--term-bg);
     border: 1px solid var(--term-border);
     border-radius: var(--radius);
@@ -225,7 +258,8 @@ body::after {
     box-shadow: inset 0 0 0 1px rgba(255, 191, 71, 0.05);
 }
 
-.search input[type="search"] {
+/* === Search input === */
+#search-form-query {
     background: transparent;
     color: var(--term-bright);
     border: 1px solid var(--term-border);
@@ -234,58 +268,32 @@ body::after {
     caret-color: var(--term-bright);
 }
 
-.search input::placeholder {
+#search-form-query::placeholder {
     color: var(--term-dim);
 }
 
-.filter-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+/* === Select dropdown === */
+#search-form-type {
     background: transparent;
     color: var(--term-amber);
     border: 1px solid var(--term-border);
     border-radius: var(--radius);
     padding: 8px 10px;
     cursor: pointer;
+    appearance: none;
+    font-family: inherit;
 }
 
-.filter-menu {
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 88px;
-    min-width: 180px;
-    background: var(--term-bg);
-    border: 1px solid var(--term-border);
-    border-radius: var(--radius);
-    padding: 4px;
-    display: none;
-}
-
-.filter-menu.open {
-    display: block;
-}
-
-.filter-option {
-    display: block;
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
-    background: transparent;
-    color: var(--term-amber);
-    border: none;
-    padding: 8px 10px;
-    border-radius: 4px;
-}
-
-.filter-option:hover,
-.filter-option:focus {
-    background: rgba(255, 191, 71, 0.07);
+/* Optional: arrow styling */
+#search-form-type:hover,
+#search-form-type:focus-visible {
     outline: none;
+    border-color: var(--term-bright);
     color: var(--term-bright);
 }
 
-.search button[type="submit"] {
+/* === Search button === */
+#btn-search-form {
     background: transparent;
     color: var(--term-bright);
     border: 1px solid var(--term-border);
@@ -296,14 +304,16 @@ body::after {
     box-shadow: inset 0 0 0 1px rgba(255, 191, 71, 0.08);
 }
 
-.search button[type="submit"]::after {
+#btn-search-form::after {
     content: " ▸";
     color: var(--term-dim);
 }
 
-.search button[type="submit"]:hover {
+#btn-search-form:hover,
+#btn-search-form:focus-visible {
     border-color: var(--term-bright);
     color: var(--term-bright);
+    outline: none;
     text-shadow: 0 0 10px rgba(255, 210, 122, 0.25);
 }
 
