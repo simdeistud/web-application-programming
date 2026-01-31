@@ -184,12 +184,238 @@ searchButton.addEventListener('click', async () => {
 
 });
 
-myteamsSelector.addEventListener('click', () => {
-    alert('My Teams selected (functionality to be implemented)');
+myteamsSelector.addEventListener('click', async () => {
+    const frame = document.querySelector('main');
+
+    const res = await fetch("http://localhost:3000/api/teams", {
+        method: "GET",
+        credentials: "include",
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        frame.innerHTML = `<p>[ERROR: ${err.error || res.statusText}]</p>`;
+        return;
+    }
+
+    const data = await res.json();
+    const teams = data.teams;
+
+
+    if (teams.length === 0) {
+        frame.innerHTML = `<p>[NO TEAMS FOUND]</p>`;
+        return;
+    }
+
+    const ul = document.createElement('ul');
+    ul.className = 'teams-list';
+    teams.forEach(team => {
+        const li = document.createElement('li');
+
+        const label = document.createElement('label');
+        label.textContent = team.name;
+
+        const detailsBtn = document.createElement('button');
+        detailsBtn.textContent = '[DETAILS]';
+        detailsBtn.addEventListener('click', () => {
+            alert(`Team: ${team.name}\nPlayers:\n` + team.players.map(p => `- ${p.name} ${p.surname}` + (p.jersey !== undefined ? ` (#${p.jersey})` : '')).join('\n'));
+        });
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '[DELETE]';
+        deleteBtn.addEventListener('click', async () => {
+            const res = await fetch(`http://localhost:3000/api/teams/${encodeURIComponent(team.name)}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+            if (res.ok) {
+                alert(`[TEAM DELETED SUCCESSFULLY]`);
+                li.remove();
+            } else {
+                res.json().then(err => {
+                    alert("Error: " + (err.error || res.statusText));
+                });
+            }
+        });
+
+        li.appendChild(label);
+        li.appendChild(detailsBtn);
+        li.appendChild(deleteBtn);
+        ul.appendChild(li);
+    });
+    frame.innerHTML = `<h2>[MY TEAMS]</h2>`;
+    frame.appendChild(ul);
+
 });
 
-newteamSelector.addEventListener('click', () => {
-    alert('New Team selected (functionality to be implemented)');
+newteamSelector.addEventListener('click', async () => {
+    const frame = document.querySelector('main');
+
+    const form = document.createElement('form');
+    form.id = 'form-new-team';
+
+    const fieldset = document.createElement('fieldset');
+    form.appendChild(fieldset);
+
+    const legend = document.createElement('legend');
+    legend.textContent = '[CREATE NEW TEAM]';
+    fieldset.appendChild(legend);
+
+    // --- Team name ---
+    const labelName = document.createElement('label');
+    labelName.htmlFor = 'team-name';
+    labelName.textContent = 'Team Name:';
+    fieldset.appendChild(labelName);
+
+    const inputName = document.createElement('input');
+    inputName.type = 'text';
+    inputName.id = 'team-name';
+    inputName.name = 'name';
+    inputName.required = true;
+    fieldset.appendChild(inputName);
+
+    // --- Players block (NEW) ---
+    const playersLegend = document.createElement('p');
+    playersLegend.className = 'hline';
+    playersLegend.textContent = 'Players:';
+    fieldset.appendChild(playersLegend);
+
+    const playersContainer = document.createElement('div');
+    playersContainer.id = 'players-container';
+    fieldset.appendChild(playersContainer);
+
+    // Row factory
+    function createPlayerRow() {
+        const row = document.createElement('div');
+        row.className = 'player-row';
+        row.style.display = 'grid';
+        row.style.gridTemplateColumns = '1fr 1fr 120px auto';
+        row.style.gap = '8px';
+        row.style.margin = '6px 0';
+
+        // Name
+        const inName = document.createElement('input');
+        inName.type = 'text';
+        inName.placeholder = 'Name';
+        inName.className = 'player-name';
+        inName.required = false; // final validation done on submit
+        row.appendChild(inName);
+
+        // Surname
+        const inSurname = document.createElement('input');
+        inSurname.type = 'text';
+        inSurname.placeholder = 'Surname';
+        inSurname.className = 'player-surname';
+        row.appendChild(inSurname);
+
+        // Jersey (optional numeric)
+        const inNumber = document.createElement('input');
+        inNumber.type = 'number';
+        inNumber.placeholder = 'Jersey # (opt)';
+        inNumber.min = '0';
+        inNumber.step = '1';
+        inNumber.className = 'player-number';
+        row.appendChild(inNumber);
+
+        // Add button (only visible on last row)
+        const addBtn = document.createElement('button');
+        addBtn.type = 'button';
+        addBtn.className = 'player-add btn'; // reuse your .btn style if desired
+        addBtn.textContent = '+';
+        row.appendChild(addBtn);
+
+        return row;
+    }
+
+    // Ensure only the last row shows the "+" button
+    function refreshAddButtons() {
+        const rows = playersContainer.querySelectorAll('.player-row');
+        rows.forEach((row, idx) => {
+            const addBtn = row.querySelector('.player-add');
+            if (!addBtn) return;
+            addBtn.hidden = idx !== rows.length - 1;
+        });
+    }
+
+    // Add first empty row
+    function addPlayerRow(focus = true) {
+        const row = createPlayerRow();
+        playersContainer.appendChild(row);
+        refreshAddButtons();
+        if (focus) row.querySelector('.player-name')?.focus({ preventScroll: true });
+    }
+    addPlayerRow(true);
+
+    // Handle clicks on the "+" of the last row
+    playersContainer.addEventListener('click', (e) => {
+        const addBtn = e.target.closest('.player-add');
+        if (!addBtn) return;
+        addPlayerRow(true);
+    });
+
+    // --- Submit button ---
+    const submitButton = document.createElement('button');
+    submitButton.type = 'submit';
+    submitButton.textContent = '[SUBMIT]';
+    fieldset.appendChild(submitButton);
+
+    // Mount form in frame
+    frame.innerHTML = '';
+    frame.appendChild(form);
+
+    // --- Submit handler: build { name, players } payload ---
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const name = document.getElementById('team-name').value.trim();
+
+        // Collect players (only rows with both name & surname)
+        const players = [];
+        playersContainer.querySelectorAll('.player-row').forEach((row) => {
+            const pname = row.querySelector('.player-name')?.value.trim() || '';
+            const psurname = row.querySelector('.player-surname')?.value.trim() || '';
+            const pnumRaw = row.querySelector('.player-number')?.value.trim() || '';
+
+            if (pname && psurname) {
+                const player = { name: pname, surname: psurname };
+                if (pnumRaw !== '') {
+                    const n = parseInt(pnumRaw, 10);
+                    if (Number.isFinite(n)) player.jersey = n; // optional
+                }
+                players.push(player);
+            }
+        });
+
+        // Basic validation: team name required; players optional
+        if (!name) {
+            alert('[ERROR] Team name is required.');
+            document.getElementById('team-name').focus();
+            return;
+        }
+
+        try {
+            const res = await fetch("http://localhost:3000/api/teams", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, players })
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                alert("Error: " + (err.error || res.statusText));
+                return;
+            }
+
+            alert('[TEAM CREATED SUCCESSFULLY]');
+            form.reset();
+            // Reset players block to a single empty row
+            playersContainer.innerHTML = '';
+            addPlayerRow(false);
+        } catch (err) {
+            console.error(err);
+            alert('[NETWORK ERROR] Could not create team.');
+        }
+    });
 });
 
 mytournamentsSelector.addEventListener('click', () => {
