@@ -9,11 +9,11 @@ The user has a **password** which is saved hashed and salted. Other basic info i
 
 ```
 user = {
-    String::username, [UNIQUE]
-    String::hashed_psw,
-    String::salt,
-    String::name,
-    String::surname
+    username, [UNIQUE]
+    name,
+    surname,
+    hashed_psw,
+    salt,
 }
 ```
 
@@ -23,14 +23,14 @@ A field can support one **sport type** between _football_, _volleyball_, and _ba
 entry for each field. Time is local time.
 ```
 field = {
-    ID::_id, [UNIQUE]
-    String::name,
-    String::type,
-    String::address,
-    String::img_uri, [optional]
-    String::description,
-    Time::opening_time,
-    Time::closing_time,
+    _id, [UNIQUE]
+    name,
+    type,
+    address,
+    img_uri, [optional]
+    description,
+    opening_time,
+    closing_time,
 }
 ```
 ### Slots information
@@ -38,11 +38,11 @@ field = {
 A booking slot for a field can only be created by the administrator. It has the following information:
 ```
 slot = {
-    ID::_id, [UNIQUE]
-    ID::field_id,
-    Date::slot_date,
-    Time::start_time,
-    Time::end_time,
+    _id, [UNIQUE]
+    field_id,
+    slot_date,
+    start_time,
+    end_time,
 }
 ```
 
@@ -50,9 +50,9 @@ slot = {
 
 ```
 booking = {
-    ID::_id, [UNIQUE]
-    ID::slot_id,
-    String::booker_name [default = None]
+    _id, [UNIQUE]
+    slot_id,
+    booker [default = null]
 }
 ```
 
@@ -60,13 +60,15 @@ booking = {
 Since players are not used anywhere else, and are not necessarily related to accounts on the platform, they are embedded in the team document.
 ```
 team = {
-    String::name, [UNIQUE]
-    player[] = {
-        String::name,
-        String::surname,
-        Int::jersey_num [optional]
-    },
-    String::creator
+    name, [UNIQUE]
+    players: [
+        player = {
+            name,
+            surname,
+            jersey [optional]
+        }
+    ] 
+    creator
 }
 ```
 
@@ -75,18 +77,14 @@ Matches are created automatically by the system. Users can only create tournamen
 
 ```
 match = {
-    String::match_id, [UNIQUE]
-    String::field_id,
-    String::tournament_id,
+    _id, [UNIQUE]
+    tournament_id,
     details = {
-        String::information [optional]
-        String[]::team_names,
-        Date::match_date,
-        String::status, [default = upcoming]
-        results[] = {
-            String::team_name,
-            Int::score
-        } [default = None]
+        information, [optional]
+        teams: [],
+        match_date,
+        status, [default = upcoming]
+        scores: []
     }   
 }
 ```
@@ -95,17 +93,18 @@ match = {
 Standings are computed by analysing the played matches.
 ```
 tournament = {
-    String::tournament_id, [UNIQUE]
-    String::name
-    String::sport_type,
-    Date::start_date,
-    Int::max_teams,
-    String::creator
+    _id, [UNIQUE]
+    name,
+    sport_type,
+    start_date,
+    max_teams,
+    creator,
     details = {
-        String::information,
-        String[]::team_names,
-        String[]::matches
-    }
+        information,
+        teams: [],
+        matches: []
+    },
+    status
 }
 ```
 
