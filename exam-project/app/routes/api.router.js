@@ -5,6 +5,7 @@ const { getDb } = require("../config/db.js");
 const fields = require('./fields.router.js');
 const tournaments = require('./tournaments.router.js');
 const matches = require('./matches.router.js');
+const teams = require('./teams.router.js');
 
 const router = express.Router();
 
@@ -12,6 +13,7 @@ router.use('/auth', auth);
 router.use('/fields', fields);
 router.use('/tournaments', tournaments);
 router.use('/matches', matches);
+router.use('/teams', teams);
 
 // GET /api/whoami - returns current user info (authenticated)
 router.get('/whoami', authenticate, async (req, res, next) => {
