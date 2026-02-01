@@ -38,16 +38,17 @@ router.put("/:id/result", authenticate, async (req, res) => {
             return res.status(404).json({ error: "Match not found" });
         }
 
-        if(match.status === "played") {
+        if (match.status === "played") {
             return res.status(400).json({ error: "Match result already recorded" });
         }
 
-        await getDb()
+        const updRes = await getDb()
             .collection("matches")
             .updateOne(
                 { _id: match_id },
                 { $set: { scores, status: "played" } }
             );
+            
 
         return res.status(200).json({ message: "Match result added successfully" });
     } catch (err) {

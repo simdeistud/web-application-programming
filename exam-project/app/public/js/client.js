@@ -1,12 +1,12 @@
 import { renderFieldsList } from './renderers/field.renderer.js';
 import { getFields } from './queriers/fields.querier.js';
-import { renderTeamsList } from './renderers/teams.renderer.js';
+import { renderTeam, renderTeamsList } from './renderers/teams.renderer.js';
 import { getTeams } from './queriers/teams.querier.js';
 import { getPlayer } from './queriers/players.querier.js';
 import { renderUsersList } from './renderers/user.renderer.js';
 import { getUsers } from './queriers/users.querier.js';
 import { renderTournament, renderTournamentsList } from './renderers/tournaments.renderer.js';
-import { getTournaments } from './queriers/tournaments.querier.js';
+import { getTournaments, getMyTournaments } from './queriers/tournaments.querier.js';
 import { getMatches } from './queriers/matches.querier.js';
 import { renderMatchesList } from './renderers/match.renderer.js';
 import { renderBookingsList } from './renderers/booking.renderer.js';
@@ -338,7 +338,7 @@ myteamsSelector.addEventListener('click', async () => {
         const detailsBtn = document.createElement('button');
         detailsBtn.textContent = '[DETAILS]';
         detailsBtn.addEventListener('click', () => {
-            alert(`Team: ${team.name}\nPlayers:\n` + team.players.map(p => `- ${p.name} ${p.surname}` + (p.jersey !== undefined ? ` (#${p.jersey})` : '')).join('\n'));
+            renderTeam(team, frame);
         });
 
         const deleteBtn = document.createElement('button');
@@ -544,30 +544,13 @@ mytournamentsSelector.addEventListener('click', async () => {
     closeAllMenus();
 
     const frame = document.querySelector('main');
+    const tournaments = await getMyTournaments();
 
-    const res = await fetch("http://localhost:3000/api/tournaments/my", {
-        method: "GET",
-        credentials: "include",
-    });
-    if (!res.ok) {
+    if (!tournaments) {
         const err = await res.json().catch(() => ({}));
         frame.innerHTML = `<p>[ERROR: ${err.error || res.statusText}]</p>`;
         return;
     }
-
-    const data = await res.json();
-    const tournaments = data.tournaments;
-
-    for (const tournament of tournaments) {
-        const resStand = await fetch(`http://localhost:3000/api/tournaments/${tournament._id}/standings`, {
-            method: "GET",
-        });
-
-        const standingsData = await resStand.json();
-        const standings = standingsData.standings;
-        tournament.standings = standings;
-    }
-
     
     if (tournaments.length === 0) {
         frame.innerHTML = `<p>[NO TOURNAMENTS FOUND]</p>`;

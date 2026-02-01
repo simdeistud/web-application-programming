@@ -22,7 +22,7 @@ export function renderTeamsList(teams, htmlElement) {
         h3.textContent = `${team.name}`;
         li.appendChild(h3);
 
-        team.players.forEach( p => {
+        team.players.forEach(p => {
             const player = document.createElement('p');
             const jerseyStr = p.jersey ? `#${p.jersey}` : "";
             player.textContent = `${p.name} ${p.surname} ${jerseyStr}`;
@@ -35,5 +35,25 @@ export function renderTeamsList(teams, htmlElement) {
     fieldset.appendChild(ul);
 
     teamsContainer.appendChild(fieldset);
+
+}
+
+export function renderTeam(team, htmlElement) {
+    const teamContainer = htmlElement;
+    teamContainer.innerHTML = '';
+
+    const fieldset = document.createElement("fieldset");
+    const legend = document.createElement("legend");
+    legend.innerText = `[${team.name}]`
+    fieldset.appendChild(legend)
+
+    team.players.forEach(p => {
+        const player = document.createElement('p');
+        const jerseyStr = p.jersey ? `#${p.jersey}` : "";
+        player.textContent = `${p.name} ${p.surname} ${jerseyStr}`;
+        fieldset.appendChild(player);
+    });
+
+    teamContainer.appendChild(fieldset);
 
 }
