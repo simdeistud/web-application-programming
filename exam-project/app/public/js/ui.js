@@ -1,5 +1,5 @@
 // ===== Utilities: close menus on outside click or Escape =====
-function closeAllMenus() {
+export function closeAllMenus() {
   // Close dropdowns
   document.querySelectorAll('.dropdown-content.open').forEach(m => m.classList.remove('open'));
   document.querySelectorAll('.dropbtn[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
