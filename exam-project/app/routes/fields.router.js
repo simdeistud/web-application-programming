@@ -54,13 +54,7 @@ router.get("/:id/slots", async (req, res) => {
                 slot_date: date,
             })
             .toArray();
-        for (const slot of slots) {
-            const found = await getDb()
-                .collection("bookings")
-                .findOne({ slot_id: slot._id });
-            slot.booked = !!found;
-        }
-        const availableSlots = slots.filter(slot => slot.booked === false);
+        const availableSlots = slots.filter(slot => !slot.booker);
         return res.status(200).json({ slots: availableSlots });
     } catch (err) {
         console.error(err);
@@ -73,7 +67,7 @@ router.get("/:id/slots", async (req, res) => {
 router.post("/:id/bookings", authenticate, async (req, res) => {
     try {
         const slot_id = idFromString(req.body.slot_id);
-        const username = req.body.username;
+        const username = req.user.username;
 
         if (!slot_id) {
             return res.status(400).json({ error: "Slot id not specified " });
@@ -88,21 +82,36 @@ router.post("/:id/bookings", authenticate, async (req, res) => {
         if (slotDateTime < now) {
             return res.status(400).json({ error: "Cannot book past slots" });
         }
-        if (await getDb().collection("bookings").findOne({ slot_id: slot_id })) {
+        if (slot.booker) {
             return res.status(409).json({ error: "Slot already booked" });
         }
 
-        await getDb().collection("bookings").insertOne({
-            slot_id: slot_id,
-            booker: username
-        });
-        const booking = await getDb().collection("bookings").findOne({ slot_id: slot_id });
+        const result = await getDb().collection("slots").updateOne(
+            { _id: slot_id },
+            { $set: { booker: username } }
+        );
 
         return res.status(200).json({
             message: "Slot booked",
-            slot: slot,
-            booking: booking
+            slot: { ...slot, booker: username },
         });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+// GET /api/fields/bookings/my
+router.get("/bookings/my", authenticate, async (req, res) => {
+    try {
+        const username = req.user.username;
+
+        const bookings = await getDb().collection("slots").find({
+            booker: username
+        }).toArray();
+
+        return res.status(200).json({ bookings });
 
     } catch (err) {
         console.error(err);
@@ -116,13 +125,13 @@ router.post("/:id/bookings", authenticate, async (req, res) => {
 router.delete("/:id/bookings/:bookingId", authenticate, async (req, res) => {
     try {
         const booking_id = idFromString(req.params.bookingId);
-        const requester = req.body.username;
+        const requester = req.user.username;
 
         if (!booking_id) {
             return res.status(400).json({ error: "Booking id not specified " });
         }
 
-        const booking = await getDb().collection("bookings").findOne({ _id: booking_id });
+        const booking = await getDb().collection("slots").findOne({ _id: booking_id });
         if (!booking) {
             return res.status(404).json({ error: "Booking not found" });
         }
@@ -131,7 +140,10 @@ router.delete("/:id/bookings/:bookingId", authenticate, async (req, res) => {
             return res.status(403).json({ error: "You cannot cancel this booking" });
         }
 
-        await getDb().collection("bookings").deleteOne({ _id: booking_id });
+        await getDb().collection("slots").updateOne(
+            { _id: booking_id },
+            { $set: { booker: null } }
+        );
 
         return res.status(200).json({
             message: "Booking cancelled"

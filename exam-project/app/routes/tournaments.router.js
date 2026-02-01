@@ -212,7 +212,7 @@ router.put("/:id", authenticate, async (req, res) => {
 
         // IMPORTANT: match by _id (consistent with findOne) and optionally creator
         const result = await tournaments.updateOne(
-            { _id: tournament_id, creator },  // <-- fixed filter
+            { _id: tournament_id, creator },
             { $set }
         );
 

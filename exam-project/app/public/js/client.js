@@ -1,5 +1,6 @@
 import { renderFieldsList } from './renderers/field.renderer.js';
 import { getMatchesFromTournament, renderMatchesList } from './renderers/match.renderer.js';   
+import { renderBookingsList } from './renderers/booking.renderer.js';
 import { closeAllMenus } from './ui.js';
 
 const loginButton = document.getElementById('btn-login');
@@ -14,6 +15,7 @@ const newtournamentSelector = document.getElementById('select-newtournament');
 const upcomingmatchesSelector = document.getElementById('select-upcomingmatches');
 const pendingmatchesSelector = document.getElementById('select-pendingmatches');
 const matcheshistorySelector = document.getElementById('select-matcheshistory');
+const mybookingsSelector = document.getElementById('select-mybookings');
 
 
 async function hasSession() {
@@ -798,6 +800,18 @@ matcheshistorySelector.addEventListener('click', async () => {
 
     const frame = document.querySelector('main');
     renderMatchesList(playedMatches, frame);
+});
+
+mybookingsSelector.addEventListener("click", async () => {
+    closeAllMenus();
+    const res = await fetch("http://localhost:3000/api/fields/bookings/my", {
+        credentials: "include",
+    });
+    const data = await res.json();
+    const bookings = data.bookings;
+
+    const frame = document.querySelector('main');
+    renderBookingsList(bookings, frame);
 });
 
 // UI interactions (menus, filters, etc.)

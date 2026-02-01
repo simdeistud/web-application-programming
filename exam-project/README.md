@@ -43,18 +43,10 @@ slot = {
     slot_date,
     start_time,
     end_time,
-}
-```
-
-### Bookings information
-
-```
-booking = {
-    _id, [UNIQUE]
-    slot_id,
     booker [default = null]
 }
 ```
+A slot is considered free if the booker is null.
 
 ### Team information
 Since players are not used anywhere else, and are not necessarily related to accounts on the platform, they are embedded in the team document.
@@ -77,15 +69,12 @@ Matches are created automatically by the system. Users can only create tournamen
 
 ```
 match = {
-    _id, [UNIQUE]
     tournament_id,
-    details = {
-        information, [optional]
-        teams: [],
-        match_date,
-        status, [default = upcoming]
-        scores: []
-    }   
+    information, [optional]
+    teams: [],
+    date,
+    status, [default = upcoming]
+    scores: []
 }
 ```
 
@@ -104,7 +93,7 @@ tournament = {
         teams: [],
         matches: []
     },
-    status
+    end_date
 }
 ```
 
