@@ -104,3 +104,5 @@ The session is implement through the use of **JWT**
 ## HOWTO
 
 The database comes loaded with two teams, a tournament to finalize, and 3 different fields. The teams and tournament are assigned to account "jd" which you have to create with your own preferred credentials. Alternatively, one can create an account and populate everything manually. The fields have free slots on teh 20th of February.
+
+In the root folder, run `docker compose up --build`, the web server will be opened at port 3000.
