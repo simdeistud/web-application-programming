@@ -2,6 +2,8 @@ import { renderFieldsList } from './renderers/field.renderer.js';
 import { getFields } from './queriers/fields.querier.js';
 import { renderTeamsList } from './renderers/teams.renderer.js';
 import { getTeams } from './queriers/teams.querier.js';
+import { getPlayer } from './queriers/players.querier.js';
+
 import { getMatchesFromTournament, renderMatchesList } from './renderers/match.renderer.js';   
 import { renderBookingsList } from './renderers/booking.renderer.js';
 import { closeAllMenus } from './ui.js';
@@ -181,8 +183,8 @@ searchButton.addEventListener('click', async () => {
         "Tournaments": [],
         "Fields": [getFields, renderFieldsList],
         "Teams": [getTeams, renderTeamsList],
-        "Users": {},
-        "Players": {},
+        "Users": [],
+        "Players": [getPlayer, renderTeamsList],
     }
 
     const resultsGetter = searchRouter[type][0];
