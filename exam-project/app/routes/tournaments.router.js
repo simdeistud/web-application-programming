@@ -240,7 +240,7 @@ router.delete("/:id", authenticate, async (req, res) => {
         const creator = req.user.username;
         const result = await getDb()
             .collection("tournaments")
-            .deleteOne({ tournament_id: tournament_id, creator: creator });
+            .deleteOne({ _id: tournament_id, creator: creator });
         if (result.deletedCount === 0) {
             return res.status(404).json({ error: "Tournament not found or not owned by user" });
         }

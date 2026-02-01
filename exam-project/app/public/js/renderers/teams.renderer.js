@@ -7,6 +7,11 @@ export function renderTeamsList(teams, htmlElement) {
         return;
     }
 
+    const fieldset = document.createElement("fieldset");
+    const legend = document.createElement("legend");
+    legend.innerText = "[TEAMS]"
+    fieldset.appendChild(legend)
+
     const ul = document.createElement('ul');
     ul.id = 'teams-list';
 
@@ -27,6 +32,8 @@ export function renderTeamsList(teams, htmlElement) {
         ul.appendChild(li);
     });
 
-    teamsContainer.appendChild(ul);
+    fieldset.appendChild(ul);
+
+    teamsContainer.appendChild(fieldset);
 
 }

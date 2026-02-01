@@ -7,6 +7,12 @@ export function renderTournamentsList(tournaments, htmlElement) {
         return;
     }
 
+
+    const fieldset = document.createElement("fieldset");
+    const legend = document.createElement("legend");
+    legend.innerText = "[TOURNAMENTS]"
+    fieldset.appendChild(legend)
+
     const ul = document.createElement('ul');
     ul.id = 'tournaments-list';
 
@@ -18,7 +24,7 @@ export function renderTournamentsList(tournaments, htmlElement) {
         li.appendChild(h3);
 
         const sport_type = document.createElement('p');
-        sport_type.textContent = `Sport: ${tournament.sport_type}`;
+        sport_type.textContent = `addEventListenerSport: ${tournament.sport_type}`;
         li.appendChild(sport_type);
 
         const status = document.createElement('p');
@@ -29,20 +35,20 @@ export function renderTournamentsList(tournaments, htmlElement) {
         start_date.textContent = `Start Date: ${tournament.start_date.split("T")[0]}`;
         li.appendChild(start_date);
 
-        if(tournament.end_date){
+        if (tournament.end_date) {
             const end_date = document.createElement('p');
             end_date.textContent = `Start Date: ${tournament.end_date.split("T")[0]}`;
             li.appendChild(end_date);
         }
 
-        if(tournament.details){
-            if(tournament.details.infomation){
+        if (tournament.details) {
+            if (tournament.details.infomation) {
                 const info = document.createElement('p');
                 info.textContent = `Info: ${tournament.details.infomation}`;
                 li.appendChild(info);
             }
 
-            if(tournament.details.teams){
+            if (tournament.details.teams) {
                 const teams = document.createElement('p');
                 teams.textContent = `Partecipating Teams: ${tournament.details.teams}`;
                 li.appendChild(teams);
@@ -52,6 +58,55 @@ export function renderTournamentsList(tournaments, htmlElement) {
         ul.appendChild(li);
     });
 
-    tournamentsContainer.appendChild(ul);
+    fieldset.appendChild(ul)
+
+
+    tournamentsContainer.appendChild(fieldset);
+
+}
+
+export function renderTournament(tournament, htmlElement) {
+    const tournamentContainer = htmlElement;
+    tournamentContainer.innerHTML = '';
+
+    const fieldset = document.createElement("fieldset");
+    const legend = document.createElement("legend");
+    legend.innerText = `[${tournament.name}]`
+    fieldset.appendChild(legend)
+
+
+    const sport_type = document.createElement('p');
+    sport_type.textContent = `Sport: ${tournament.sport_type}`;
+    fieldset.appendChild(sport_type);
+
+    const status = document.createElement('p');
+    status.textContent = tournament.end_date ? `Status: [concluded]` : "Status: [ongoing]";
+    fieldset.appendChild(status);
+
+    const start_date = document.createElement('p');
+    start_date.textContent = `Start Date: ${tournament.start_date.split("T")[0]}`;
+    fieldset.appendChild(start_date);
+
+    if (tournament.end_date) {
+        const end_date = document.createElement('p');
+        end_date.textContent = `Start Date: ${tournament.end_date.split("T")[0]}`;
+        fieldset.appendChild(end_date);
+    }
+
+    if (tournament.details) {
+        if (tournament.details.infomation) {
+            const info = document.createElement('p');
+            info.textContent = `Info: ${tournament.details.infomation}`;
+            fieldset.appendChild(info);
+        }
+
+        if (tournament.details.teams) {
+            const teams = document.createElement('p');
+            teams.textContent = `Partecipating Teams: ${tournament.details.teams}`;
+            fieldset.appendChild(teams);
+        }
+    }
+
+    tournamentContainer.appendChild(fieldset);
 
 }

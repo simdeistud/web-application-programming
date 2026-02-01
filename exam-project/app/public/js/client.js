@@ -5,9 +5,10 @@ import { getTeams } from './queriers/teams.querier.js';
 import { getPlayer } from './queriers/players.querier.js';
 import { renderUsersList } from './renderers/user.renderer.js';
 import { getUsers } from './queriers/users.querier.js';
-import { renderTournamentsList } from './renderers/tournaments.renderer.js';
+import { renderTournament, renderTournamentsList } from './renderers/tournaments.renderer.js';
 import { getTournaments } from './queriers/tournaments.querier.js';
-import { getMatchesFromTournament, renderMatchesList } from './renderers/match.renderer.js';   
+import { getMatches } from './queriers/matches.querier.js';
+import { renderMatchesList } from './renderers/match.renderer.js';
 import { renderBookingsList } from './renderers/booking.renderer.js';
 import { closeAllMenus } from './ui.js';
 
@@ -47,23 +48,58 @@ function setUIMode(loggedIn) {
 
 loginButton.addEventListener('click', () => {
     const frame = document.querySelector('main');
-    frame.innerHTML = `
-    <form id="form-login">
-      <fieldset>
-        <legend>[LOGIN]</legend>
-        <label for="login-username">Username:</label>
-        <input type="text" id="login-username" name="username" required />
-        <label for="login-password">Password:</label>
-        <input type="password" id="login-password" name="password" required />
-        <button type="submit">[SUBMIT]</button>
-      </fieldset>
-    </form>
-  `;
 
-    document.getElementById('form-login').addEventListener('submit', async (event) => {
+    // <form id="form-login">
+    const form = document.createElement('form');
+    form.id = 'form-login';
+    // <fieldset>
+    const fieldset = document.createElement('fieldset');
+    // <legend>[LOGIN]</legend>
+    const legend = document.createElement('legend');
+    legend.textContent = '[LOGIN]';
+    // <label for="login-username">Username:</label>
+    const labelUser = document.createElement('label');
+    labelUser.setAttribute('for', 'login-username');
+    labelUser.textContent = 'Username:';
+    // <input type="text" id="login-username" name="username" required>
+    const inputUser = document.createElement('input');
+    inputUser.type = 'text';
+    inputUser.id = 'login-username';
+    inputUser.name = 'username';
+    inputUser.required = true;
+    // <label for="login-password">Password:</label>
+    const labelPass = document.createElement('label');
+    labelPass.setAttribute('for', 'login-password');
+    labelPass.textContent = 'Password:';
+    // <input type="password" id="login-password" name="password" required>
+    const inputPass = document.createElement('input');
+    inputPass.type = 'password';
+    inputPass.id = 'login-password';
+    inputPass.name = 'password';
+    inputPass.required = true;
+    // <button class="btn" type="submit">[SUBMIT]</button>
+    const btn = document.createElement('button');
+    btn.type = 'submit';
+    btn.className = 'btn';
+    btn.textContent = '[SUBMIT]';
+
+    fieldset.append(
+        legend,
+        labelUser, inputUser,
+        labelPass, inputPass,
+        btn
+    );
+    form.appendChild(fieldset);
+
+    // attach to frame
+    frame.innerHTML = '';          // optional: clear previous content
+    frame.appendChild(form);
+
+
+    form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const username = document.getElementById('login-username').value;
-        const password = document.getElementById('login-password').value;
+        const username = inputUser.value;
+        const password = inputPass.value;
 
         const res = await fetch("http://localhost:3000/api/auth/signin", {
             method: "POST",
@@ -81,60 +117,126 @@ loginButton.addEventListener('click', () => {
 
         // after successful login, refresh UI mode
         setUIMode(true);
-        frame.innerHTML = `<h2>[WELCOME ${res.body.username}]</h2><p>[YOU ARE NOW LOGGED IN]</p>`;
+        frame.innerHTML = `<fieldset><legend>[WELCOME ${username}]</legend><p>[YOU ARE NOW LOGGED IN]</p></fieldset>`;
     });
 });
 
 registerButton.addEventListener('click', async () => {
     const frame = document.querySelector('main');
-    // Inject registration form
-    frame.innerHTML = `
-        <form id="form-register">
-            <fieldset>
-                <legend>[REGISTER]</legend>
-                <label for="register-username">Username:</label>
-                <input type="text" id="register-username" name="username" required />
-                <label for="register-first-name">First Name:</label>
-                <input type="text" id="register-first-name" name="first-name" required />
-                <label for="register-last-name">Last Name:</label>
-                <input type="text" id="register-last-name" name="last-name" required />
-                <label for="register-password">Password:</label>
-                <input type="password" id="register-password" name="password" required />
-                <button id="btn-register-form">[SUBMIT]</button>
-            </fieldset>
-        </form>
-        `;
-    const registerFormButton = document.getElementById('btn-register-form');
-    if (registerFormButton) {
-        registerFormButton.addEventListener('click', async (event) => {
-            event.preventDefault();
-            // Handle registration form submission
-            const username = document.getElementById('register-username').value;
-            const firstName = document.getElementById('register-first-name').value;
-            const lastName = document.getElementById('register-last-name').value;
-            const password = document.getElementById('register-password').value;
-            console.log(`Registering with Username: ${username}, First Name: ${firstName}, Last Name: ${lastName}, Password: ${password}`);
-            const response = await fetch("http://localhost:3000/api/auth/signup", {
-                method: "POST",
-                body: JSON.stringify({
-                    username: username,
-                    name: firstName,
-                    surname: lastName,
-                    password: password
-                }),
-                headers: {
-                    "Content-type": "application/json; charset=UTF-8"
-                }
-            }).then(r => r.json())
-            console.log(response);
+
+    // <form id="form-register">
+    const form = document.createElement('form');
+    form.id = 'form-register';
+
+    // <fieldset>
+    const fieldset = document.createElement('fieldset');
+
+    // <legend>[REGISTER]</legend>
+    const legend = document.createElement('legend');
+    legend.textContent = '[REGISTER]';
+
+    // <label for="register-username">Username:</label>
+    const labelUser = document.createElement('label');
+    labelUser.setAttribute('for', 'register-username');
+    labelUser.textContent = 'Username:';
+
+    // <input type="text" id="register-username" name="username" required>
+    const inputUser = document.createElement('input');
+    inputUser.type = 'text';
+    inputUser.id = 'register-username';
+    inputUser.name = 'username';
+    inputUser.required = true;
+
+    // <label for="register-first-name">First Name:</label>
+    const labelFirst = document.createElement('label');
+    labelFirst.setAttribute('for', 'register-first-name');
+    labelFirst.textContent = 'First Name:';
+
+    // <input type="text" id="register-first-name" name="first-name" required>
+    const inputFirst = document.createElement('input');
+    inputFirst.type = 'text';
+    inputFirst.id = 'register-first-name';
+    inputFirst.name = 'first-name';
+    inputFirst.required = true;
+
+    // <label for="register-last-name">Last Name:</label>
+    const labelLast = document.createElement('label');
+    labelLast.setAttribute('for', 'register-last-name');
+    labelLast.textContent = 'Last Name:';
+
+    // <input type="text" id="register-last-name" name="last-name" required>
+    const inputLast = document.createElement('input');
+    inputLast.type = 'text';
+    inputLast.id = 'register-last-name';
+    inputLast.name = 'last-name';
+    inputLast.required = true;
+
+    // <label for="register-password">Password:</label>
+    const labelPass = document.createElement('label');
+    labelPass.setAttribute('for', 'register-password');
+    labelPass.textContent = 'Password:';
+
+    // <input type="password" id="register-password" name="password" required>
+    const inputPass = document.createElement('input');
+    inputPass.type = 'password';
+    inputPass.id = 'register-password';
+    inputPass.name = 'password';
+    inputPass.required = true;
+
+    // <button class="btn" id="btn-register-form">[SUBMIT]</button>
+    const btn = document.createElement('button');
+    btn.type = 'submit';                // make it submit the form
+    btn.className = 'btn';
+    btn.id = 'btn-register-form';
+    btn.textContent = '[SUBMIT]';
+
+    fieldset.append(
+        legend,
+        labelUser, inputUser,
+        labelFirst, inputFirst,
+        labelLast, inputLast,
+        labelPass, inputPass,
+        btn
+    );
+
+    form.appendChild(fieldset);
+
+    // attach to frame
+    frame.innerHTML = '';               // optional: clear previous content
+    frame.appendChild(form);
+
+    btn.addEventListener('click', async (event) => {
+        event.preventDefault();
+        // Handle registration form submission
+        const username = inputUser.value;
+        const firstName = inputFirst.value;
+        const lastName = inputLast.value;
+        const password = inputPass.value;
+        console.log(`Registering with Username: ${username}, First Name: ${firstName}, Last Name: ${lastName}, Password: ${password}`);
+        const response = await fetch("http://localhost:3000/api/auth/signup", {
+            method: "POST",
+            body: JSON.stringify({
+                username: username,
+                name: firstName,
+                surname: lastName,
+                password: password
+            }),
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            }
         });
-    }
+
+        if (!response.ok) {
+            alert('[REGISTRATION UNSUCCESSFUL]');
+            await setUIMode(false);
+        } else {
+            frame.innerHTML = `<fieldset><legend>[WELCOME ${username}]</legend><p>[YOU CAN NOW LOG-IN]</p></fieldset>`;
+        }
+    });
+
     if (await hasSession()) {
         await setUIMode(true);
-        frame.innerHTML = `<h2>[WELCOME BACK]</h2><p>[YOU ARE LOGGED IN]</p>`;
-    } else {
-        alert('Registration unsuccessful.');
-        await setUIMode(false);
+        frame.innerHTML = `<fieldset><legend>[WELCOME ${username}]</legend><p>[YOU ARE ALREADY LOGGED IN]</p></fieldset>`;
     }
 });
 
@@ -339,7 +441,7 @@ newteamSelector.addEventListener('click', async () => {
         // Add button (only visible on last row)
         const addBtn = document.createElement('button');
         addBtn.type = 'button';
-        addBtn.className = 'player-add btn'; // reuse your .btn style if desired
+        addBtn.className = 'player-add-btn'; // reuse your .btn style if desired
         addBtn.textContent = '+';
         row.appendChild(addBtn);
 
@@ -350,7 +452,7 @@ newteamSelector.addEventListener('click', async () => {
     function refreshAddButtons() {
         const rows = playersContainer.querySelectorAll('.player-row');
         rows.forEach((row, idx) => {
-            const addBtn = row.querySelector('.player-add');
+            const addBtn = row.querySelector('.player-add-btn');
             if (!addBtn) return;
             addBtn.hidden = idx !== rows.length - 1;
         });
@@ -367,7 +469,7 @@ newteamSelector.addEventListener('click', async () => {
 
     // Handle clicks on the "+" of the last row
     playersContainer.addEventListener('click', (e) => {
-        const addBtn = e.target.closest('.player-add');
+        const addBtn = e.target.closest('.player-add-btn');
         if (!addBtn) return;
         addPlayerRow(true);
     });
@@ -441,6 +543,8 @@ newteamSelector.addEventListener('click', async () => {
 mytournamentsSelector.addEventListener('click', async () => {
     closeAllMenus();
 
+    const frame = document.querySelector('main');
+
     const res = await fetch("http://localhost:3000/api/tournaments/my", {
         method: "GET",
         credentials: "include",
@@ -454,9 +558,9 @@ mytournamentsSelector.addEventListener('click', async () => {
     const data = await res.json();
     const tournaments = data.tournaments;
 
-    for (const tournament of tournaments){
+    for (const tournament of tournaments) {
         const resStand = await fetch(`http://localhost:3000/api/tournaments/${tournament._id}/standings`, {
-        method: "GET",
+            method: "GET",
         });
 
         const standingsData = await resStand.json();
@@ -464,7 +568,7 @@ mytournamentsSelector.addEventListener('click', async () => {
         tournament.standings = standings;
     }
 
-    const frame = document.querySelector('main');
+    
     if (tournaments.length === 0) {
         frame.innerHTML = `<p>[NO TOURNAMENTS FOUND]</p>`;
         return;
@@ -481,7 +585,24 @@ mytournamentsSelector.addEventListener('click', async () => {
         const detailsBtn = document.createElement('button');
         detailsBtn.textContent = '[DETAILS]';
         detailsBtn.addEventListener('click', () => {
-            alert(`Tournament: ${tournament.name}\nSport Type: ${tournament.sport_type}\nStart Date: ${new Date(tournament.start_date).toLocaleDateString()}\nMax Teams: ${tournament.max_teams}`);
+            renderTournament(tournament, frame)
+        });
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '[DELETE]';
+        deleteBtn.addEventListener('click', async () => {
+            const res = await fetch(`http://localhost:3000/api/tournaments/${encodeURIComponent(tournament._id)}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+            if (res.ok) {
+                alert(`[TOURNAMENT DELETED SUCCESSFULLY]`);
+                li.remove();
+            } else {
+                res.json().then(err => {
+                    alert("Error: " + (err.error || res.statusText));
+                });
+            }
         });
 
         if (tournament.start_date < Date.now() && !tournament.end_date) {
@@ -584,8 +705,6 @@ mytournamentsSelector.addEventListener('click', async () => {
                     addTeamRow(true);
                 });
 
-                
-
                 const submitButton = document.createElement('button');
                 submitButton.type = 'submit';
                 submitButton.textContent = '[GENERATE MATCH SCHEDULE]';
@@ -643,7 +762,7 @@ mytournamentsSelector.addEventListener('click', async () => {
                         form.reset();
                     } catch (err) {
                         console.error(err);
-                        alert('[NETWORK ERROR] Could not finalize tournament.');
+                        alert('[ERROR] Could not finalize tournament.');
                     }
                 });
             });
@@ -652,6 +771,7 @@ mytournamentsSelector.addEventListener('click', async () => {
 
         li.appendChild(label);
         li.appendChild(detailsBtn);
+        li.append(deleteBtn);
         ul.appendChild(li);
     });
     frame.innerHTML = `<h2>[MY TOURNAMENTS]</h2>`;
@@ -770,8 +890,7 @@ upcomingmatchesSelector.addEventListener('click', async () => {
 
     const upcomingMatches = [];
     for (const tournament of tournaments) {
-        const matches = await getMatchesFromTournament(tournament, "upcoming");
-        console.log(matches);
+        const matches = await getMatches(tournament, "upcoming");
         upcomingMatches.push(...matches);
     }
 
@@ -786,10 +905,10 @@ pendingmatchesSelector.addEventListener('click', async () => {
     });
     const data = await res.json();
     const tournaments = data.tournaments;
-    
+
     const pendingMatches = [];
     for (const tournament of tournaments) {
-        const matches = await getMatchesFromTournament(tournament, "pending");
+        const matches = await getMatches(tournament, "pending");
         pendingMatches.push(...matches);
     }
 
@@ -807,7 +926,7 @@ matcheshistorySelector.addEventListener('click', async () => {
 
     const playedMatches = [];
     for (const tournament of tournaments) {
-        const matches = await getMatchesFromTournament(tournament, "played");
+        const matches = await getMatches(tournament, "played");
         playedMatches.push(...matches);
     }
 

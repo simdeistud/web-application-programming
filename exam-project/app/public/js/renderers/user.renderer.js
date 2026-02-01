@@ -7,6 +7,11 @@ export function renderUsersList(users, htmlElement) {
         return;
     }
 
+    const fieldset = document.createElement("fieldset");
+    const legend = document.createElement("legend");
+    legend.innerText = "[USERS]"
+    fieldset.appendChild(legend)
+
     const ul = document.createElement('ul');
     ul.id = 'users-list';
 
@@ -26,6 +31,7 @@ export function renderUsersList(users, htmlElement) {
         ul.appendChild(li);
     });
 
-    usersContainer.appendChild(ul);
+    fieldset.appendChild(ul);
+    usersContainer.appendChild(fieldset);
 
 }

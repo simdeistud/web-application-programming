@@ -114,7 +114,7 @@ router.get("/bookings/my", authenticate, async (req, res) => {
 
         const upcomingBookings = bookings.filter( b => {
             const slotDateTime = new Date(`${b.slot_date}T${b.start_time}:00`);
-            return slotDateTime > now;
+            return slotDateTime > new Date();
         });
 
         return res.status(200).json({ bookings: upcomingBookings });
@@ -143,7 +143,7 @@ router.delete("/:id/bookings/:bookingId", authenticate, async (req, res) => {
         }
 
         const slotDateTime = new Date(`${booking.slot_date}T${booking.start_time}:00`);
-        if (booking.booker !== requester || slotDateTime <= now) {
+        if (booking.booker !== requester || slotDateTime <= new Date()) {
             return res.status(403).json({ error: "You cannot cancel this booking" });
         }
 

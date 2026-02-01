@@ -1,17 +1,3 @@
-export async function getMatchesFromTournament(tournament, status = "all") {
-    const res = await fetch(`http://localhost:3000/api/tournaments/${tournament._id}/matches`);
-    const data = await res.json();
-    let matches = data.matches;
-    if (status == "upcoming") {
-        matches = matches.filter(match => match.status === "upcoming" && new Date(match.date) >= new Date());
-    } else if (status == "pending") {
-        matches = matches.filter(match => match.status === "upcoming" && new Date(match.date) < new Date()).map(match => ({ ...match, status: "pending" }));
-    } else if (status == "played") {
-        matches = matches.filter(match => match.status === "played");
-    }
-    return matches;
-}
-
 export function renderMatchesList(matches, htmlElement) {
     const matchesContainer = htmlElement;
     matchesContainer.innerHTML = '';
@@ -20,6 +6,11 @@ export function renderMatchesList(matches, htmlElement) {
         matchesContainer.innerHTML = '<p>No matches found.</p>';
         return;
     }
+
+    const fieldset = document.createElement("fieldset");
+    const legend = document.createElement("legend");
+    legend.innerText = "[MATCHES]"
+    fieldset.appendChild(legend)
 
     const ul = document.createElement('ul');
     ul.id = 'matches-list';
@@ -89,7 +80,9 @@ export function renderMatchesList(matches, htmlElement) {
         ul.appendChild(li);
     });
 
-    matchesContainer.appendChild(ul);
+    fieldset.appendChild(ul);
+
+    matchesContainer.appendChild(fieldset);
 
 }
 
