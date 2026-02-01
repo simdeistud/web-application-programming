@@ -101,40 +101,42 @@ appDb.slots.insertMany([
   }
 ]);
 
-/*appDb.teams.insertMany([
+appDb.teams.insertMany([
   {
     name: "Team A",
-    players: [
-      {
-        name: "Pinco",
-        surname: "Pallino",
-        jersey_number: 7
-      },
-      {
-        name: "Mario",
-        surname: "Rossi",
-      },
-      {
-        name: "Luigi",
-        surname: "Verdi",
-        jersey_number: 5
-      }
-    ]
+    players: [{
+      name: "Alice",
+      surname: "Anderson",
+      jersey: 9,
+    }, {
+      name: "Aaron",
+      surname: "Avery",
+      jersey: 10,
+    }],
+    creator: "test",
   },
   {
     name: "Team B",
-    players: [
-      {
-        name: "Anna",
-        surname: "Bianchi",
-        jersey_number: 9
-      },
-      {
-        name: "Sara",
-        surname: "Neri",
-      }
-    ]
-  }
-]);*/
+    players: [{
+      name: "Bob",
+      surname: "Brown",
+      jersey: 7,
+    }, {
+      name: "Bella",
+      surname: "Benson",
+    }],
+    creator: "test",
+  },
+]);
+
+appDb.tournaments.insertOne({
+  name: "Sample Football Tournament",
+  sport_type: "Football",
+  start_date: new Date("2026-10-02"),
+  max_teams: 5,
+  creator: "test",
+});
+
+
 
 print("Initialization completed.");
