@@ -587,16 +587,28 @@ mytournamentsSelector.addEventListener('click', async () => {
                     }
 
                     try {
-                        const res = await fetch(`http://localhost:3000/api/tournaments/${encodeURIComponent(tournament._id)}`, {
+                        const resMod = await fetch(`http://localhost:3000/api/tournaments/${encodeURIComponent(tournament._id)}`, {
                             method: "PUT",
                             credentials: "include",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ details: { teams } })
                         });
 
-                        if (!res.ok) {
-                            const err = await res.json().catch(() => ({}));
-                            alert("Error: " + (err.error || res.statusText));
+                        if (!resMod.ok) {
+                            const err = await resMod.json().catch(() => ({}));
+                            alert("Error: " + (err.error || resMod.statusText));
+                            return;
+                        }
+
+                        const resGen = await fetch(`http://localhost:3000/api/tournaments/${encodeURIComponent(tournament._id)}/matches/generate`, {
+                            method: "POST",
+                            credentials: "include",
+                            headers: { "Content-Type": "application/json" },
+                        });
+
+                        if (!resGen.ok) {
+                            const err = await resGen.json().catch(() => ({}));
+                            alert("Error: " + (err.error || resGen.statusText));
                             return;
                         }
 
