@@ -40,7 +40,7 @@ function setUIMode(loggedIn) {
     registerButton.style.display = loggedIn ? 'none' : 'inline';
     myaccountButton.style.display = loggedIn ? 'inline' : 'none';
     logoutButton.style.display = loggedIn ? 'inline' : 'none';
-    document.getElementById('account-features').style.display = loggedIn ? 'inline' : 'none';
+    document.getElementById('account-features').style.display = loggedIn ? 'flex' : 'none';
 }
 
 // initial render
