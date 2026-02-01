@@ -51,8 +51,11 @@ ensureCollection(appDb, "fields");
 ensureCollection(appDb, "tournaments");
 ensureCollection(appDb, "matches");
 ensureCollection(appDb, "slots");
-ensureCollection(appDb, "bookings");
 ensureCollection(appDb, "teams");
+
+appDb.fields.createIndex({ name: "text", type: "text" });
+appDb.teams.createIndex({ name: "text" });
+appDb.users.createIndex({ name: "text", surname: "text", username: "text" });
 
 appDb.fields.insertOne({
   name: "Sample Football Field",
