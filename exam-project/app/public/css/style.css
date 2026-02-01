@@ -286,7 +286,7 @@ input::placeholder {
 
 /* === Select dropdown === */
 #search-form-type {
-    background: transparent;
+    background: var(--term-bg);
     color: var(--term-amber);
     border: 1px solid var(--term-border);
     border-radius: var(--radius);
