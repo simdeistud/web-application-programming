@@ -30,11 +30,12 @@ router.get("/:id/standings", async (req, res) => {
 router.get("", async (req, res) => {
     try {
         const q = req.query.q || "";
+        const filter = q
+            ? { $text: { $search: q } }   // text search when non-empty
+            : {};
         const tournaments = await getDb()
             .collection("tournaments")
-            .find({
-                name: { $regex: q, $options: "i" } // "i" stands for case insensitive match
-            })
+            .find(filter)
             .toArray();
         return res.status(200).json({ tournaments });
     } catch (err) {
