@@ -111,7 +111,12 @@ router.get("/bookings/my", authenticate, async (req, res) => {
             booker: username
         }).toArray();
 
-        return res.status(200).json({ bookings });
+        const upcomingBookings = bookings.filter( b => {
+            const slotDateTime = new Date(`${b.slot_date}T${b.start_time}:00`);
+            return slotDateTime > now;
+        });
+
+        return res.status(200).json({ bookings: upcomingBookings });
 
     } catch (err) {
         console.error(err);
@@ -136,7 +141,8 @@ router.delete("/:id/bookings/:bookingId", authenticate, async (req, res) => {
             return res.status(404).json({ error: "Booking not found" });
         }
 
-        if (booking.booker !== requester) {
+        const slotDateTime = new Date(`${booking.slot_date}T${booking.start_time}:00`);
+        if (booking.booker !== requester || slotDateTime <= now) {
             return res.status(403).json({ error: "You cannot cancel this booking" });
         }
 
