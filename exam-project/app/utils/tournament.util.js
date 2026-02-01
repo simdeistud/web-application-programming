@@ -1,3 +1,5 @@
+import { addDays, normalizeToDate, toIsoDate } from "./date.util.js";
+
 export function generateMatchSchedule(tournament) {
 
     const ROUND_INTERVAL_DAYS = 2;
@@ -34,8 +36,9 @@ export function generateMatchSchedule(tournament) {
             if (home == null || away == null) continue;
 
             matches.push({
+                tournament_id: tournament._id,
                 teams: [home, away],
-                match_date: roundDateISO,
+                date: roundDateISO,
                 status: "upcoming"
             });
         }
@@ -71,7 +74,6 @@ export function getStandings(matches, sport_type) {
     }
 
     // --- Initialize table ---
-    /** @type {Record<string, {team:string, points:number, played:number, scored:number, conceded:number, difference:number}>} */
     const table = {};
     for (const team of teamsSet) {
         table[team] = {
@@ -95,7 +97,7 @@ export function getStandings(matches, sport_type) {
         if (!Array.isArray(s) || s.length !== 2) continue;
 
         const [A, B] = t;
-        const [a, b] = s;
+        const [a, b] = (s ?? []).map(x => x === "" || x == null ? NaN : Number(x));
         if (A == null || B == null) continue;
         if (typeof a !== "number" || typeof b !== "number" || !Number.isFinite(a) || !Number.isFinite(b)) continue;
 
@@ -145,20 +147,3 @@ export function getStandings(matches, sport_type) {
 
 }
 
-
-/* Helpers */
-function normalizeToDate(d) {
-    if (d instanceof Date) return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-    const parsed = new Date(d);
-    return Number.isNaN(parsed.getTime()) ? new Date(NaN) : parsed;
-}
-
-function addDays(baseDate, days) {
-    const r = new Date(baseDate.getTime());
-    r.setUTCDate(r.getUTCDate() + days);
-    return r;
-}
-
-function toIsoDate(d) {
-    return d.toISOString().slice(0, 10);
-}

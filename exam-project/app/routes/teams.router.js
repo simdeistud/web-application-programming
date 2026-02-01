@@ -44,6 +44,20 @@ router.get("", async (req, res) => {
     }
 });
 
+// GET /api/teams/myteams  List user's teams
+router.get("/myteams", authenticate, async (req, res) => {
+    try {
+        const teams = await getDb()
+            .collection("teams")
+            .find({ creator: req.user.username })
+            .toArray();
+        return res.status(200).json({ teams });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 //  GET  /api/teams/:name  Team details
 router.get("/:name", async (req, res) => {
     try {
