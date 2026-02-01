@@ -111,6 +111,24 @@ appDb.slots.insertMany([
     slot_date: "2026-01-20",
     start_time: "10:00",
     end_time: "11:00",
+  },
+  {
+    field_id: appDb.fields.findOne({ name: "Sample Volleyball Field" })._id,
+    slot_date: "2026-01-20",
+    start_time: "10:00",
+    end_time: "11:00",
+  },
+  {
+    field_id: appDb.fields.findOne({ name: "Sample Volleyball Field" })._id,
+    slot_date: "2026-01-20",
+    start_time: "11:00",
+    end_time: "14:00",
+  },
+  {
+    field_id: appDb.fields.findOne({ name: "Sample Volleyball Field" })._id,
+    slot_date: "2026-01-20",
+    start_time: "15:00",
+    end_time: "19:00",
   }
 ]);
 
@@ -137,6 +155,18 @@ appDb.teams.insertMany([
     }, {
       name: "Bella",
       surname: "Benson",
+    }],
+    creator: "jd",
+  },
+  {
+    name: "Team C",
+    players: [{
+      name: "Cob",
+      surname: "Cherry",
+      jersey: 15,
+    }, {
+      name: "Charlie",
+      surname: "Chirp",
     }],
     creator: "jd",
   },
