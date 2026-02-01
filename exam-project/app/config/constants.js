@@ -1,0 +1,1 @@
+export const SPORT_TYPES = ["football", "basketball", "volleyball"];
