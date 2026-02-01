@@ -8,11 +8,12 @@ const router = express.Router();
 router.get("", async (req, res) => {
     try {
         const q = req.query.q || "";
+        const filter = q
+            ? { $text: { $search: q } }   // text search when non-empty
+            : {};
         const fields = await getDb()
             .collection("fields")
-            .find({
-                 $text: { $search: q } 
-            })
+            .find(filter)
             .toArray();
         if (!fields || fields.length === 0) {
             return res.status(404).json({ error: "No fields found" });

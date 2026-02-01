@@ -7,7 +7,7 @@ const router = express.Router();
 // POST  /api/teams  Create team
 router.post("", authenticate, async (req, res) => {
     try {
-        const {name, players} = req.body;
+        const { name, players } = req.body;
         if (!name || !Array.isArray(players)) {
             return res.status(400).json({ error: "Missing or invalid team name or players" });
         }
@@ -35,9 +35,12 @@ router.get("", async (req, res) => {
 
     try {
         const q = req.query.q || "";
+        const filter = q
+            ? { $text: { $search: q } }   // text search when non-empty
+            : {};
         const teams = await getDb()
             .collection("teams")
-            .find({ $text: { $search: q } })
+            .find(filter)
             .toArray();
         return res.status(200).json({ teams });
     } catch (err) {
