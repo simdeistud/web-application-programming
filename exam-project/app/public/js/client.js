@@ -5,6 +5,8 @@ import { getTeams } from './queriers/teams.querier.js';
 import { getPlayer } from './queriers/players.querier.js';
 import { renderUsersList } from './renderers/user.renderer.js';
 import { getUsers } from './queriers/users.querier.js';
+import { renderTournamentsList } from './renderers/tournaments.renderer.js';
+import { getTournaments } from './queriers/tournaments.querier.js';
 import { getMatchesFromTournament, renderMatchesList } from './renderers/match.renderer.js';   
 import { renderBookingsList } from './renderers/booking.renderer.js';
 import { closeAllMenus } from './ui.js';
@@ -174,14 +176,12 @@ logoutButton.addEventListener('click', async () => {
     frame.innerHTML = ``;
 });
 
-// Now it only works with fields, but can be extended later
 searchButton.addEventListener('click', async () => {
     const query = document.getElementById('search-form-query').value;
     const type = document.getElementById('search-form-type').value;
 
-    // type -> (resultsGetter, resultsRenderer)
     const searchRouter = {
-        "Tournaments": [],
+        "Tournaments": [getTournaments, renderTournamentsList],
         "Fields": [getFields, renderFieldsList],
         "Teams": [getTeams, renderTeamsList],
         "Users": [getUsers, renderUsersList],

@@ -1,4 +1,5 @@
 const express = require("express");
+const { SPORT_TYPES } = require("../config/constants.js");
 const { authenticate } = require('../middleware/auth.middleware.js');
 const { getDb, idFromString } = require("../config/db.js");
 const { generateMatchSchedule, getStandings } = require("../utils/tournament.util.js");
@@ -104,6 +105,9 @@ router.post("", authenticate, async (req, res) => {
         const creator = req.user.username;
         if (!name || !sport_type || !start_date || !max_teams) {
             return res.status(400).json({ error: "Missing required fields" });
+        }
+        if (!SPORT_TYPES.includes(sport_type)){
+            return res.status(400).json({ error: "Invalid sport type." });
         }
         const newTournament = {
             name,
