@@ -11,14 +11,14 @@ router.get("", async (req, res) => {
         const fields = await getDb()
             .collection("fields")
             .find({
-                name: { $regex: q, $options: "i" } // "i" stands for case insensitive match
+                 $text: { $search: q } 
             })
             .toArray();
         if (!fields || fields.length === 0) {
             return res.status(404).json({ error: "No fields found" });
         }
         const trimmed = fields.map(({ _id, name }) => ({ _id, name }))
-        return res.status(200).json({ trimmed });
+        return res.status(200).json({ fields: trimmed });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Internal server error" });

@@ -30,12 +30,14 @@ router.post("", authenticate, async (req, res) => {
     }
 });
 
-// GET /api/teams  List teams
+// GET /api/teams?q=query  List teams (searchable) <-- NOT IN THE SPEC BUT DOESN'T CHANGE DEFAULT BEHAVIOR
 router.get("", async (req, res) => {
+
     try {
+        const q = req.query.q || "";
         const teams = await getDb()
             .collection("teams")
-            .find({})
+            .find({ $text: { $search: q } })
             .toArray();
         return res.status(200).json({ teams });
     } catch (err) {
@@ -44,8 +46,8 @@ router.get("", async (req, res) => {
     }
 });
 
-// GET /api/teams/myteams  List user's teams
-router.get("/myteams", authenticate, async (req, res) => {
+// GET /api/teams/my  List user's teams
+router.get("/my", authenticate, async (req, res) => {
     try {
         const teams = await getDb()
             .collection("teams")

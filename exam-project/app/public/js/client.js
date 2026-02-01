@@ -1,4 +1,7 @@
 import { renderFieldsList } from './renderers/field.renderer.js';
+import { getFields } from './queriers/fields.querier.js';
+import { renderTeamsList } from './renderers/teams.renderer.js';
+import { getTeams } from './queriers/teams.querier.js';
 import { getMatchesFromTournament, renderMatchesList } from './renderers/match.renderer.js';   
 import { renderBookingsList } from './renderers/booking.renderer.js';
 import { closeAllMenus } from './ui.js';
@@ -173,27 +176,34 @@ searchButton.addEventListener('click', async () => {
     const query = document.getElementById('search-form-query').value;
     const type = document.getElementById('search-form-type').value;
 
-    const res = await fetch(`http://localhost:3000/api/${type.toLowerCase()}?q=${encodeURIComponent(query)}`, {
-        method: "GET",
-    });
+    // type -> (resultsGetter, resultsRenderer)
+    const searchRouter = {
+        "Tournaments": [],
+        "Fields": [getFields, renderFieldsList],
+        "Teams": [getTeams, renderTeamsList],
+        "Users": {},
+        "Players": {},
+    }
+
+    const resultsGetter = searchRouter[type][0];
+    const resultsRenderer = searchRouter[type][1];
+
+    const data = await resultsGetter(query);
 
     const frame = document.querySelector('main');
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        frame.innerHTML = `<p>[ERROR: ${err.error || res.statusText}]</p>`;
+    if (!data) {
+        frame.innerHTML = `<p>[ERROR]</p>`;
         return;
     }
 
-    const data = await res.json();
-    renderFieldsList(data.trimmed, frame);
-
+    resultsRenderer(data, frame);
 });
 
 myteamsSelector.addEventListener('click', async () => {
     closeAllMenus();
     const frame = document.querySelector('main');
 
-    const res = await fetch("http://localhost:3000/api/teams", {
+    const res = await fetch("http://localhost:3000/api/teams/my", {
         method: "GET",
         credentials: "include",
     });
