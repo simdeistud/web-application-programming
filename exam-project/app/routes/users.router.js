@@ -4,7 +4,7 @@ const { getDb } = require("../config/db.js");
 const router = express.Router();
 
 // GET /api/users - returns all registered users
-router.get('/users', async (req, res) => {
+router.get('', async (req, res) => {
   try {
     const q = req.query.q || "";
     const filter = q
@@ -20,7 +20,7 @@ router.get('/users', async (req, res) => {
         user.tournaments = tournaments;
     }
 
-    return res.status(200).json({ users: users.map(u => { u.username, u.name, u.surname, u.tournaments }) });
+    return res.status(200).json({ users: users.map(u => ({ username: u.username, name: u.name, surname: u.surname, tournaments: u.tournaments })) });
   } catch (e) {
     return res.status(500).json({ error: 'Internal server error' });
   }

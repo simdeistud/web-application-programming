@@ -3,7 +3,8 @@ import { getFields } from './queriers/fields.querier.js';
 import { renderTeamsList } from './renderers/teams.renderer.js';
 import { getTeams } from './queriers/teams.querier.js';
 import { getPlayer } from './queriers/players.querier.js';
-
+import { renderUsersList } from './renderers/user.renderer.js';
+import { getUsers } from './queriers/users.querier.js';
 import { getMatchesFromTournament, renderMatchesList } from './renderers/match.renderer.js';   
 import { renderBookingsList } from './renderers/booking.renderer.js';
 import { closeAllMenus } from './ui.js';
@@ -183,7 +184,7 @@ searchButton.addEventListener('click', async () => {
         "Tournaments": [],
         "Fields": [getFields, renderFieldsList],
         "Teams": [getTeams, renderTeamsList],
-        "Users": [],
+        "Users": [getUsers, renderUsersList],
         "Players": [getPlayer, renderTeamsList],
     }
 
