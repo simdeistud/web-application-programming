@@ -139,6 +139,17 @@ router.post("/:id/matches/generate", authenticate, async (req, res) => {
         if (tournament.creator !== req.user.username) {
             return res.status(403).json({ error: "Forbidden: only the creator can generate matches" });
         }
+
+        for (const team of tournament.details.teams){
+            console.log(team)
+            const exists = await getDb()
+            .collection("teams")
+            .findOne({ name: team });
+            if (!exists){
+                return res.status(400).json({ error: `Team ${team} doesn't exist.` });
+            }
+        }
+
         const matches = generateMatchSchedule(tournament);
         if (matches.length === 0) {
             return res.status(400).json({ error: "Not enough teams to generate matches" });
