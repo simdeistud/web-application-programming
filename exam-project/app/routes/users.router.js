@@ -7,7 +7,10 @@ const router = express.Router();
 router.get('/users', async (req, res) => {
   try {
     const q = req.query.q || "";
-    const users = await getDb().collection("users").find({ $text: { $search: q } }).toArray();
+    const filter = q
+            ? { $text: { $search: q } }   // text search when non-empty
+            : {};
+    const users = await getDb().collection("users").find(filter).toArray();
     if (!users) {
         return res.status(404).json({ error: 'There are no users' });
     } 

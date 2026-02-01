@@ -6,6 +6,7 @@ const fields = require('./fields.router.js');
 const tournaments = require('./tournaments.router.js');
 const matches = require('./matches.router.js');
 const teams = require('./teams.router.js');
+const users = require('./users.router.js');
 
 const router = express.Router();
 
@@ -14,6 +15,7 @@ router.use('/fields', fields);
 router.use('/tournaments', tournaments);
 router.use('/matches', matches);
 router.use('/teams', teams);
+router.use('/users', users);
 
 // GET /api/whoami - returns current user info (authenticated)
 router.get('/whoami', authenticate, async (req, res, next) => {
