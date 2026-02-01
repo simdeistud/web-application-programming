@@ -1,16 +1,33 @@
 const express = require("express");
 const { authenticate } = require('../middleware/auth.middleware.js');
+const { getDb, idFromString } = require("../config/db.js");
+const { generateMatchSchedule, getStandings } = require("../utils/tournament.util.js");
 const router = express.Router();
 
 // GET  /api/tournaments/:id/standings  Tournament standings
-router.get("", (req, res) => {});
+router.get("/:id/standings", async (req, res) => {
+    try {
+        const tournament_id = idFromString(req.params.id);
+        const tournament = await getDb()
+            .collection("tournaments")
+            .findOne({ _id: tournament_id });
+        if (!tournament) {
+            return res.status(404).json({ error: "Tournament not found" });
+        }
+        const matches = tournament.details?.matches || [];
+        const standings = getStandings(matches, tournament.sport_type);
+        return res.status(200).json({ standings });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+});
 
 // GET  /api/tournaments?q=query  List of tournaments
 router.get("", async (req, res) => {
     try {
         const q = req.query.q || "";
-        const tournaments = await db.client
-            .db("calcetto")
+        const tournaments = await getDb()
             .collection("tournaments")
             .find({
                 name: { $regex: q, $options: "i" } // "i" stands for case insensitive match
@@ -24,16 +41,29 @@ router.get("", async (req, res) => {
 });
 
 // GET  /api/tournaments/:id/matches  List matches
-router.get("", (req, res) => {});
+router.get("/:id/matches", async (req, res) => {
+    try {
+        const tournament_id = idFromString(req.params.id);
+        const tournament = await getDb()
+            .collection("tournaments")
+            .findOne({ _id: tournament_id });
+        if (!tournament || !tournament.details || !Array.isArray(tournament.details.matches)) {
+            return res.status(404).json({ error: "Tournament or matches not found" });
+        }
+        return res.status(200).json({ matches: tournament.details.matches });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+});
 
 // GET  /api/tournaments/:id  Tournament details
-router.get("", async (req, res) => {
+router.get("/:id", async (req, res) => {
     try {
-        const { id } = req.params;
-        const tournament = await db.client
-            .db("calcetto")
+        const tournament_id = idFromString(req.params.id);
+        const tournament = await getDb()
             .collection("tournaments")
-            .findOne({ id: id });
+            .findOne({ tournament_id: tournament_id });
         if (!tournament) {
             return res.status(404).json({ error: "Tournament not found" });
         }
@@ -45,17 +75,156 @@ router.get("", async (req, res) => {
 });
 
 // POST  /api/tournaments  Create a new tournament (authenticated)
-router.post("", (req, res) => {});
+router.post("", authenticate, async (req, res) => {
+    try {
+        const { name, sport_type, start_date, max_teams } = req.body;
+        const creator = req.user.username;
+        if (!name || !sport_type || !start_date || !max_teams) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+        const newTournament = {
+            name,
+            sport_type,
+            start_date: new Date(start_date),
+            max_teams,
+            creator: creator,
+        };
+        const result = await getDb()
+            .collection("tournaments")
+            .insertOne(newTournament);
+        return res.status(201).json({ tournament: result });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+});
 
 // POST  /api/tournaments/:id/matches/generate  Generate match schedule
-router.post("", (req, res) => {});
+router.post("/:id/matches/generate", authenticate, async (req, res) => {
+    try {
+        const tournament_id = idFromString(req.params.id);
+        const tournament = await getDb()
+            .collection("tournaments")
+            .findOne({ _id: tournament_id });
+        if (!tournament) {
+            return res.status(404).json({ error: "Tournament not found" });
+        }
+        if (tournament.creator !== req.user.username) {
+            return res.status(403).json({ error: "Forbidden: only the creator can generate matches" });
+        }
+        const matches = generateMatchSchedule(tournament);
+        if (matches.length === 0) {
+            return res.status(400).json({ error: "Not enough teams to generate matches" });
+        }
+        const result = await getDb()
+            .collection("tournaments")
+            .updateOne(
+                { _id: tournament_id },
+                { $set: { "details.matches": matches } }
+            );
+        return res.status(201).json({ matches });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+});
 
 // PUT  /api/tournaments/:id  Edit tournament data
-router.put("", async (req, res) => {
-    
+// PUT  /api/tournaments/:id  Edit tournament data
+router.put("/:id", authenticate, async (req, res) => {
+    try {
+        const tournament_id = idFromString(req.params.id);
+        const updates = req.body ?? {};
+        const creator = req.user.username;
+
+        // Load tournament
+        const tournaments = getDb().collection("tournaments");
+        const tournament = await tournaments.findOne({ _id: tournament_id });
+        if (!tournament) {
+            return res.status(404).json({ error: "Tournament not found" });
+        }
+        if (tournament.creator !== creator) {
+            return res.status(403).json({ error: "Forbidden: only the creator can edit the tournament" });
+        }
+
+        // Normalize incoming values
+        const incomingTeams = updates?.details?.teams;              // may be undefined
+        const incomingMaxTeams = updates?.max_teams;                // may be undefined
+        const currentTeams = tournament?.details?.teams || [];      // default empty array
+        const currentMaxTeams = tournament?.max_teams;              // may be undefined
+
+        // ===== Validation rules =====
+        // Case A: both new teams and new max_teams provided
+        if (Array.isArray(incomingTeams) && typeof incomingMaxTeams !== "undefined") {
+            if (incomingTeams.length > incomingMaxTeams) {
+                return res.status(400).json({ error: "Number of teams exceeds max_teams limit" });
+            }
+        }
+
+        // Case B: only new max_teams provided
+        if (typeof incomingMaxTeams !== "undefined" && !Array.isArray(incomingTeams)) {
+            if (currentTeams.length > incomingMaxTeams) {
+                return res.status(400).json({ error: "max_teams cannot be less than the number of teams in the tournament" });
+            }
+        }
+
+        // Case C: only new teams provided
+        if (Array.isArray(incomingTeams) && typeof incomingMaxTeams === "undefined") {
+            if (typeof currentMaxTeams !== "undefined" && incomingTeams.length > currentMaxTeams) {
+                return res.status(400).json({ error: "Number of teams exceeds max_teams limit" });
+            }
+        }
+
+        // ===== Build update document defensively =====
+        const $set = {};
+
+        // Update only when explicitly provided
+        if (Array.isArray(incomingTeams)) {
+            // This creates details if missing and sets the array
+            $set["details.teams"] = incomingTeams;
+        }
+        if (typeof incomingMaxTeams !== "undefined") {
+            $set.max_teams = incomingMaxTeams;
+        }
+
+        if (Object.keys($set).length === 0) {
+            // Nothing to update; return 204 No Content or 400 depending on your API design
+            return res.status(400).json({ error: "No valid fields to update" });
+        }
+
+        // IMPORTANT: match by _id (consistent with findOne) and optionally creator
+        const result = await tournaments.updateOne(
+            { _id: tournament_id, creator },  // <-- fixed filter
+            { $set }
+        );
+
+        if (result.matchedCount === 0) {
+            // Shouldn’t happen given the earlier findOne/creator check, but keep for safety
+            return res.status(404).json({ error: "Tournament not found" });
+        }
+
+        return res.status(200).json({ message: "Tournament updated successfully" });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
 });
 
 // DELETE  /api/tournaments/:id  Delete the tournament (creator only)
-router.delete("", (req, res) => {});
-
+router.delete("/:id", authenticate, async (req, res) => {
+    try {
+        const tournament_id = idFromString(req.params.id);
+        const creator = req.user.username;
+        const result = await getDb()
+            .collection("tournaments")
+            .deleteOne({ tournament_id: tournament_id, creator: creator });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: "Tournament not found or not owned by user" });
+        }
+        return res.status(200).json({ message: "Tournament deleted successfully" });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+});
 module.exports = router;
