@@ -1,15 +1,15 @@
 const express = require("express");
 const { authenticate } = require('../middleware/auth.middleware.js');
+const { getDb, idFromString } = require("../config/db.js");
 const router = express.Router();
 
 //  GET  /api/matches/:id  Match details
 router.get("/:id", async (req, res) => {
     try {
-        const { id } = req.params;
-        const match = await db.client
-            .db("calcetto")
+        const match_id = idFromString(req.params.id);
+        const match = await getDb()
             .collection("matches")
-            .findOne({ id: id });
+            .findOne({ id: match_id });
         if (!match) {
             return res.status(404).json({ error: "Match not found" });
         }
@@ -23,32 +23,33 @@ router.get("/:id", async (req, res) => {
 // PUT  /api/matches/:id/result  Enter match result
 router.put("/:id/result", authenticate, async (req, res) => {
     try {
-        const { id } = req.params;
-        const { results } = req.body;
+        const match_id = idFromString(req.params.id);
+        const { scores } = req.body;
 
-        if (results === undefined) {
-            return res.status(400).json({ error: "Missing results" });
+        if (scores === undefined) {
+            return res.status(400).json({ error: "Missing scores" });
         }
 
-        const match = await db.client
-            .db("calcetto")
+        const match = await getDb()
             .collection("matches")
-            .findOne({ match_id: id });
+            .findOne({ _id: match_id });
 
         if (!match) {
             return res.status(404).json({ error: "Match not found" });
         }
 
-        await db.client
-            .db("calcetto")
+        if(match.status === "played") {
+            return res.status(400).json({ error: "Match result already recorded" });
+        }
+
+        await getDb()
             .collection("matches")
             .updateOne(
-                { match_id: id },
-                { $set: { "details.results": results } },
-                { $set: { "details.status": "played" } }
+                { _id: match_id },
+                { $set: { scores, status: "played" } }
             );
 
-        return res.status(200).json({ message: "Match result updated successfully" });
+        return res.status(200).json({ message: "Match result added successfully" });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Internal server error" });

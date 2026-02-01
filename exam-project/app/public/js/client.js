@@ -1,4 +1,5 @@
 import { renderFieldsList } from './renderers/field.renderer.js';
+import { getMatchesFromTournament, renderMatchesList } from './renderers/match.renderer.js';   
 import { closeAllMenus } from './ui.js';
 
 const loginButton = document.getElementById('btn-login');
@@ -11,6 +12,7 @@ const newteamSelector = document.getElementById('select-newteam');
 const mytournamentsSelector = document.getElementById('select-mytournaments');
 const newtournamentSelector = document.getElementById('select-newtournament');
 const upcomingmatchesSelector = document.getElementById('select-upcomingmatches');
+const pendingmatchesSelector = document.getElementById('select-pendingmatches');
 const matcheshistorySelector = document.getElementById('select-matcheshistory');
 
 
@@ -424,7 +426,7 @@ newteamSelector.addEventListener('click', async () => {
 mytournamentsSelector.addEventListener('click', async () => {
     closeAllMenus();
 
-    const res = await fetch("http://localhost:3000/api/tournaments", {
+    const res = await fetch("http://localhost:3000/api/tournaments/my", {
         method: "GET",
         credentials: "include",
     });
@@ -436,6 +438,16 @@ mytournamentsSelector.addEventListener('click', async () => {
 
     const data = await res.json();
     const tournaments = data.tournaments;
+
+    for (const tournament of tournaments){
+        const resStand = await fetch(`http://localhost:3000/api/tournaments/${tournament._id}/standings`, {
+        method: "GET",
+        });
+
+        const standingsData = await resStand.json();
+        const standings = standingsData.standings;
+        tournament.standings = standings;
+    }
 
     const frame = document.querySelector('main');
     if (tournaments.length === 0) {
@@ -733,12 +745,59 @@ newtournamentSelector.addEventListener('click', () => {
 
 });
 
-upcomingmatchesSelector.addEventListener('click', () => {
-    alert('Upcoming Matches selected (functionality to be implemented)');
+upcomingmatchesSelector.addEventListener('click', async () => {
+    closeAllMenus();
+    const res = await fetch("http://localhost:3000/api/tournaments/my", {
+        credentials: "include"
+    });
+    const data = await res.json();
+    const tournaments = data.tournaments;
+
+    const upcomingMatches = [];
+    for (const tournament of tournaments) {
+        const matches = await getMatchesFromTournament(tournament, "upcoming");
+        console.log(matches);
+        upcomingMatches.push(...matches);
+    }
+
+    const frame = document.querySelector('main');
+    renderMatchesList(upcomingMatches, frame);
 });
 
-matcheshistorySelector.addEventListener('click', () => {
-    alert('Matches History selected (functionality to be implemented)');
+pendingmatchesSelector.addEventListener('click', async () => {
+    closeAllMenus();
+    const res = await fetch("http://localhost:3000/api/tournaments/my", {
+        credentials: "include"
+    });
+    const data = await res.json();
+    const tournaments = data.tournaments;
+    
+    const pendingMatches = [];
+    for (const tournament of tournaments) {
+        const matches = await getMatchesFromTournament(tournament, "pending");
+        pendingMatches.push(...matches);
+    }
+
+    const frame = document.querySelector('main');
+    renderMatchesList(pendingMatches, frame);
+});
+
+matcheshistorySelector.addEventListener('click', async () => {
+    closeAllMenus();
+    const res = await fetch("http://localhost:3000/api/tournaments/my", {
+        credentials: "include"
+    });
+    const data = await res.json();
+    const tournaments = data.tournaments;
+
+    const playedMatches = [];
+    for (const tournament of tournaments) {
+        const matches = await getMatchesFromTournament(tournament, "played");
+        playedMatches.push(...matches);
+    }
+
+    const frame = document.querySelector('main');
+    renderMatchesList(playedMatches, frame);
 });
 
 // UI interactions (menus, filters, etc.)

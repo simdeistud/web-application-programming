@@ -14,7 +14,10 @@ router.get("/:id/standings", async (req, res) => {
         if (!tournament) {
             return res.status(404).json({ error: "Tournament not found" });
         }
-        const matches = tournament.details?.matches || [];
+        const matches = await getDb()
+            .collection("matches")
+            .find({ tournament_id: tournament._id, status: "played" })
+            .toArray();
         const standings = getStandings(matches, tournament.sport_type);
         return res.status(200).json({ standings });
     } catch (err) {
@@ -40,6 +43,21 @@ router.get("", async (req, res) => {
     }
 });
 
+// GET /api/tournaments/my  List of user's tournaments
+router.get("/my", authenticate, async (req, res) => {
+    try {
+        const username = req.user.username;
+        const tournaments = await getDb()
+            .collection("tournaments")
+            .find({ creator: username })
+            .toArray();
+        return res.status(200).json({ tournaments });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 // GET  /api/tournaments/:id/matches  List matches
 router.get("/:id/matches", async (req, res) => {
     try {
@@ -47,10 +65,14 @@ router.get("/:id/matches", async (req, res) => {
         const tournament = await getDb()
             .collection("tournaments")
             .findOne({ _id: tournament_id });
-        if (!tournament || !tournament.details || !Array.isArray(tournament.details.matches)) {
-            return res.status(404).json({ error: "Tournament or matches not found" });
+        if (!tournament) {
+            return res.status(404).json({ error: "Tournament  not found" });
         }
-        return res.status(200).json({ matches: tournament.details.matches });
+        const matches = await getDb()
+            .collection("matches")
+            .find({ tournament_id: tournament._id })
+            .toArray();
+        return res.status(200).json({ matches });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Internal server error" });
@@ -117,11 +139,8 @@ router.post("/:id/matches/generate", authenticate, async (req, res) => {
             return res.status(400).json({ error: "Not enough teams to generate matches" });
         }
         const result = await getDb()
-            .collection("tournaments")
-            .updateOne(
-                { _id: tournament_id },
-                { $set: { "details.matches": matches } }
-            );
+            .collection("matches")
+            .insertMany(matches);
         return res.status(201).json({ matches });
     } catch (err) {
         console.error(err);
@@ -129,7 +148,6 @@ router.post("/:id/matches/generate", authenticate, async (req, res) => {
     }
 });
 
-// PUT  /api/tournaments/:id  Edit tournament data
 // PUT  /api/tournaments/:id  Edit tournament data
 router.put("/:id", authenticate, async (req, res) => {
     try {
