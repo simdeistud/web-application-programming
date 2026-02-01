@@ -59,7 +59,7 @@ appDb.users.createIndex({ name: "text", surname: "text", username: "text" });
 
 appDb.fields.insertOne({
   name: "Sample Football Field",
-  type: "Soccer",
+  type: "Football",
   description: "A standard soccer field.",
   address: "123 Soccer St, Sportstown",
   img_uri: `http://localhost:${process.env.WEB_PORT || 3000}/img/fields/field.jpg`,
@@ -75,6 +75,16 @@ appDb.fields.insertOne({
   img_uri: `http://localhost:${process.env.WEB_PORT || 3000}/img/fields/field2.jpg`,
   opening_time: "08:01",
   closing_time: "22:01"
+});
+
+appDb.fields.insertOne({
+  name: "Sample Volleyball Field",
+  type: "Volleyball",
+  description: "A third standard volleyball field.",
+  address: "123 Volley St, Sportstown",
+  img_uri: `http://localhost:${process.env.WEB_PORT || 3000}/img/fields/field3.jpg`,
+  opening_time: "06:00",
+  closing_time: "19:30"
 });
 
 appDb.slots.insertMany([
@@ -116,7 +126,7 @@ appDb.teams.insertMany([
       surname: "Avery",
       jersey: 10,
     }],
-    creator: "test",
+    creator: "jd",
   },
   {
     name: "Team B",
@@ -128,7 +138,7 @@ appDb.teams.insertMany([
       name: "Bella",
       surname: "Benson",
     }],
-    creator: "test",
+    creator: "jd",
   },
 ]);
 
@@ -137,9 +147,7 @@ appDb.tournaments.insertOne({
   sport_type: "Football",
   start_date: new Date("2026-10-02"),
   max_teams: 5,
-  creator: "test",
+  creator: "jd",
 });
-
-
 
 print("Initialization completed.");
